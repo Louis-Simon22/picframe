@@ -1,11 +1,11 @@
 package picframe.at.picframe.settings;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import picframe.at.picframe.activities._MainApp;
 import picframe.at.picframe.R;
 
 public class SettingsDefaults {
@@ -15,8 +15,8 @@ public class SettingsDefaults {
     private static Boolean fBool = false;
 
     static {
-        defValues.put(R.string.sett_key_username,"");
-        defValues.put(R.string.sett_key_password,"");
+        defValues.put(R.string.sett_key_username, "");
+        defValues.put(R.string.sett_key_password, "");
         defValues.put(R.string.sett_key_slideshow, tBool);
         defValues.put(R.string.sett_key_scaling, fBool);
         defValues.put(R.string.sett_key_randomize, fBool);
@@ -30,27 +30,19 @@ public class SettingsDefaults {
         defValues.put(R.string.sett_key_downloadInterval, "12");
         defValues.put(R.string.sett_key_tutorial, true);
     }
-/*  <string name="sett_key_firstStart" translatable="false">FirstStart</string>     */
+    /*  <string name="sett_key_firstStart" translatable="false">FirstStart</string>     */
 
     public static Object getDefaultValueForKey(int key) {
         return defValues.get(key);
     }
 
-    public static void resetSettings() {
-        SharedPreferences.Editor prefEditor = AppData.getSharedPreferences().edit();
+    public static void resetSettings(Context context) {
+        SharedPreferences.Editor prefEditor = AppData.getSharedPreferences(context).edit();
         for (Map.Entry<Integer, Object> prefSet : defValues.entrySet()) {
             if (prefSet.getValue() instanceof String) {
-                prefEditor
-                    .putString(
-                        _MainApp.getINSTANCE().getApplicationContext().getString(prefSet.getKey()),
-                            (String)prefSet.getValue())
-                    .commit();
+                prefEditor.putString(context.getString(prefSet.getKey()), (String) prefSet.getValue()).commit();
             } else if (prefSet.getValue() instanceof Boolean) {
-                prefEditor
-                    .putBoolean(
-                        _MainApp.getINSTANCE().getApplicationContext().getString(prefSet.getKey()),
-                            (Boolean) prefSet.getValue())
-                    .commit();
+                prefEditor.putBoolean(context.getString(prefSet.getKey()), (Boolean) prefSet.getValue()).commit();
             }
         }
     }

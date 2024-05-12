@@ -31,7 +31,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -40,40 +39,38 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.Toolbar;
+
+import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
-import picframe.at.picframe.helper.Keys;
 import picframe.at.picframe.R;
 import picframe.at.picframe.helper.GlobalPhoneFuncs;
+import picframe.at.picframe.helper.Keys;
 import picframe.at.picframe.helper.alarm.AlarmScheduler;
-import picframe.at.picframe.service.connectionChecker.ConnectionCheck_OC;
 import picframe.at.picframe.settings.AppData;
-import picframe.at.picframe.settings.SettingsDefaults;
-import picframe.at.picframe.settings.detailsPrefScreen.DetailsPreferenceScreen;
 import picframe.at.picframe.settings.MySwitchPref;
+import picframe.at.picframe.settings.detailsPrefScreen.DetailsPreferenceScreen;
 import picframe.at.picframe.settings.detailsPrefScreen.ExtSdPrefs;
 
 @SuppressWarnings("deprecation")
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
-    private PreferenceCategory myCat2;
+    private PreferenceCategory preferenceCategory;
     private AlarmScheduler alarmScheduler;
-    private SharedPreferences mPrefs;
+    private SharedPreferences sharedPreferences;
     private ArrayList<String> editableTitleFields = new ArrayList<>();
     private ArrayList<String> fieldsToRemove = new ArrayList<>();
     private StatusReceiver receiver;
@@ -87,12 +84,12 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         PreferenceManager prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName(AppData.mySettingsFilename);
         prefMgr.setSharedPreferencesMode(MODE_PRIVATE);
-        mPrefs = AppData.getSharedPreferences();
-        mPrefs.registerOnSharedPreferenceChangeListener(this);
+        sharedPreferences = AppData.getSharedPreferences(getApplicationContext());
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-        if (DEBUG)  printAllPreferences();
+        if (DEBUG) printAllPreferences();
         addPreferencesFromResource(R.xml.settings);
-        myCat2 = (PreferenceCategory) findPreference(getString(R.string.sett_key_cat2));
+        preferenceCategory = (PreferenceCategory) findPreference(getString(R.string.sett_key_cat2));
 
         populateEditableFieldsList();
         populateFieldsToRemove();
@@ -107,12 +104,12 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     }
 
     private void printAllPreferences() {
-        Map<String, ?> keyMap = mPrefs.getAll();
+        Map<String, ?> keyMap = sharedPreferences.getAll();
         for (String e : keyMap.keySet()) {
             debug("DUMP| Key: " + e + " ++ Value: " + keyMap.get(e));
         }
 
-        alarmScheduler = new AlarmScheduler();
+        alarmScheduler = new AlarmScheduler(getApplicationContext());
 
     }
 
@@ -142,30 +139,10 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        Toolbar bar;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
-            bar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
-            root.addView(bar, 0); // insert at top
-        } else {
-            ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
-            ListView content = (ListView) root.getChildAt(0);
-            root.removeAllViews();
-            bar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
-
-            int height;
-            TypedValue tv = new TypedValue();
-            if (getTheme().resolveAttribute(R.attr.actionBarSize, tv, true)) {
-                height = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
-            }else{
-                height = bar.getHeight();
-            }
-            content.setPadding(0, height, 0, 0);
-
-            root.addView(content);
-            root.addView(bar);
-        }
+        LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
+        Toolbar bar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
+        root.addView(bar, 0); // insert at top
         bar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -204,17 +181,10 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
             if (getString(R.string.sett_key_srctype).equals(key)) {
                 createCat2Fields();
                 alarmScheduler.scheduleAlarm();
-            } else if (getString(R.string.sett_key_username).equals(key)  ||
-                        getString(R.string.sett_key_password).equals(key) ||
-                        getString(R.string.sett_key_srcpath_owncloud).equals(key)) {
+            } else if (getString(R.string.sett_key_username).equals(key) ||
+                    getString(R.string.sett_key_password).equals(key) ||
+                    getString(R.string.sett_key_srcpath_owncloud).equals(key)) {
                 setLoginStatus(false);
-                if (!AppData.getUserName().equals("") &&
-                        !AppData.getUserPassword().equals("") &&
-                        !AppData.getSourcePath().equals("") &&
-                        !AppData.getSourcePath().equals(SettingsDefaults
-                                .getDefaultValueForKey(R.string.sett_key_srcpath_owncloud))) {
-                    new Handler().post(new ConnectionCheck_OC());
-                }
             } else if (getString(R.string.sett_key_loginCheckButton).equals(key) ||
                     getString(R.string.sett_key_downloadInterval).equals(key)) {
                 alarmScheduler.scheduleAlarm();
@@ -223,7 +193,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     }
 
     private void setLoginStatus(boolean status) {
-        AppData.setLoginSuccessful(status);
+        AppData.setLoginSuccessful(getApplicationContext(), status);
         // TODO: change layout (status view)
     }
 
@@ -241,14 +211,14 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         if (mPref != null) {
             if (mPref instanceof ListPreference) {
 //                mPrefValue = ((ListPreference)mPref).getEntry() == null ? "" :  ((ListPreference)mPref).getEntry().toString();
-                mPrefValue = (String) mPrefs.getAll().get(key);
+                mPrefValue = (String) sharedPreferences.getAll().get(key);
                 if (mPrefValue != ((ListPreference) mPref).getValue()) {
                     ((ListPreference) mPref).setValue(mPrefValue);
                 }
                 int index = ((ListPreference) mPref).findIndexOfValue(mPrefValue);
-                mPrefValue = (String)((ListPreference) mPref).getEntries()[index];
+                mPrefValue = (String) ((ListPreference) mPref).getEntries()[index];
             } else if (mPref instanceof EditTextPreference) {
-                mPrefValue = (String) mPrefs.getAll().get(key);
+                mPrefValue = (String) sharedPreferences.getAll().get(key);
 //                mPrefValue = ((EditTextPreference)mPref).getText();
                 if (getString(R.string.sett_key_password).equals(key) && mPrefValue != null && !mPrefValue.equals("")) {
                     //noinspection ReplaceAllDot
@@ -256,10 +226,10 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                 }
             } else {
                 if (getString(R.string.sett_key_srcpath_sd).equals(mPref.getKey()) &&
-                        AppData.sourceTypes.ExternalSD.equals(AppData.getSourceType())) {
-                    mPrefValue = AppData.getSourcePath();
+                        AppData.sourceTypes.ExternalSD.equals(AppData.getSourceType(getApplicationContext()))) {
+                    mPrefValue = AppData.getSourcePath(getApplicationContext());
                 } else if (getString(R.string.sett_key_loginCheckButton).equals(mPref.getKey())) {
-                    mPrefValue = AppData.getLoginSuccessful() ? getString(R.string.sett_loginCheck_success) : getString(R.string.sett_loginCheck_failure);
+                    mPrefValue = AppData.getLoginSuccessful(getApplicationContext()) ? getString(R.string.sett_loginCheck_success) : getString(R.string.sett_loginCheck_failure);
                 }
             }
             if (getString(R.string.sett_key_displaytime).equals(key)) {
@@ -298,7 +268,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         // remove the preference screen, before adding it again
         PreferenceScreen removeScreen = (PreferenceScreen) findPreference(getString(R.string.sett_key_prefScreenDetails));
         if (removeScreen != null) {
-            myCat2.removePreference(removeScreen);
+            preferenceCategory.removePreference(removeScreen);
             debug("removed old Pref screen");
         }
         // remove the fields, before adding them again
@@ -306,26 +276,25 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         for (String path : fieldsToRemove) {
             removePref = findPreference(path);
             if (removePref != null) {
-                myCat2.removePreference(removePref);
+                preferenceCategory.removePreference(removePref);
                 debug("removed:" + removePref.getTitle().toString());
             }
         }
     }
 
     public void setDetailsPrefScreen() {
-        if (AppData.sourceTypes.OwnCloud.equals(AppData.getSourceType())) {
+        if (AppData.sourceTypes.OwnCloud == AppData.getSourceType(getApplicationContext())) {
             detailsPrefScreenToAdd = new DetailsPreferenceScreen(
-                    AppData.getSrcTypeInt(),
+                    AppData.getSrcTypeInt(getApplicationContext()),
                     getPreferenceManager().createPreferenceScreen(this),
                     SettingsActivity.this);
-            //detailsPrefScreenToAdd.set*Resource
-            if (myCat2 != null && detailsPrefScreenToAdd.getPreferenceScreen() != null) {
-                myCat2.addPreference(detailsPrefScreenToAdd.getPreferenceScreen());
+            if (preferenceCategory != null && detailsPrefScreenToAdd.getPreferenceScreen() != null) {
+                preferenceCategory.addPreference(detailsPrefScreenToAdd.getPreferenceScreen());
             }
-        } else if (AppData.sourceTypes.ExternalSD.equals(AppData.getSourceType())) {
+        } else if (AppData.sourceTypes.ExternalSD.equals(AppData.getSourceType(getApplicationContext()))) {
             Preference pref = new ExtSdPrefs(this).getFolderPicker();
-            if (myCat2 != null && pref != null) {
-                myCat2.addPreference(pref);
+            if (preferenceCategory != null && pref != null) {
+                preferenceCategory.addPreference(pref);
             }
         }
 
@@ -335,19 +304,19 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         Preference myRecCheckbox;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             myRecCheckbox = new CheckBoxPreference(this);
-            ((CheckBoxPreference)myRecCheckbox).setSummaryOff(R.string.sett_recursiveSearchSummOff);
-            ((CheckBoxPreference)myRecCheckbox).setSummaryOn(R.string.sett_recursiveSearchSummOn);
+            ((CheckBoxPreference) myRecCheckbox).setSummaryOff(R.string.sett_recursiveSearchSummOff);
+            ((CheckBoxPreference) myRecCheckbox).setSummaryOn(R.string.sett_recursiveSearchSummOn);
         } else {
             myRecCheckbox = new MySwitchPref(this);
-            ((MySwitchPref)myRecCheckbox).setSummaryOff(R.string.sett_recursiveSearchSummOff);
-            ((MySwitchPref)myRecCheckbox).setSummaryOn(R.string.sett_recursiveSearchSummOn);
+            ((MySwitchPref) myRecCheckbox).setSummaryOff(R.string.sett_recursiveSearchSummOff);
+            ((MySwitchPref) myRecCheckbox).setSummaryOn(R.string.sett_recursiveSearchSummOn);
         }
         myRecCheckbox.setTitle(R.string.sett_recursiveSearch);
         myRecCheckbox.setSummary(R.string.sett_recursiveSearchSumm);
         myRecCheckbox.setDefaultValue(true);
         myRecCheckbox.setKey(getString(R.string.sett_key_recursiveSearch));
-        if (myCat2 != null) {
-            myCat2.addPreference(myRecCheckbox);
+        if (preferenceCategory != null) {
+            preferenceCategory.addPreference(myRecCheckbox);
         }
     }
 
@@ -377,8 +346,8 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                 return true;
             }
         });
-        if (myCat2 != null) {
-            myCat2.addPreference(myDelDataButton);
+        if (preferenceCategory != null) {
+            preferenceCategory.addPreference(myDelDataButton);
         }
     }
 
@@ -408,14 +377,14 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                 return true;
             }
         });
-        if (myCat2 != null) {
-            myCat2.addPreference(myResetButton);
+        if (preferenceCategory != null) {
+            preferenceCategory.addPreference(myResetButton);
         }
 
     }
 
     public void resetSettingsToDefault() {
-        AppData.resetSettings();
+        AppData.resetSettings(getApplicationContext());
     }
 
     @Override
@@ -434,55 +403,32 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         return false;
     }
 
-    public ViewGroup getStatusView () {
+    public ViewGroup getStatusView() {
         return detailsPrefScreenToAdd.getStatusViewGroup();
     }
 
     /************************************************************************************
-    *   needed because else the nested preference screen don't have a actionbar/toolbar *
-    *   see the fix and the given problem here: http://stackoverflow.com/a/27455363     *
-    ************************************************************************************/
+     *   needed because else the nested preference screen don't have a actionbar/toolbar *
+     *   see the fix and the given problem here: http://stackoverflow.com/a/27455363     *
+     ************************************************************************************/
     public void setUpNestedScreen(PreferenceScreen preferenceScreen) {
         final Dialog dialog = preferenceScreen.getDialog();
         if (dialog == null)
             return;
         //ViewGroup list;
         Toolbar bar = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            //list = (ViewGroup) dialog.findViewById(android.R.id.list);
-            View tmp = dialog.findViewById(android.R.id.list);
-            LinearLayout root = null;
+        //list = (ViewGroup) dialog.findViewById(android.R.id.list);
+        View tmp = dialog.findViewById(android.R.id.list);
+        LinearLayout root = null;
+        if (tmp instanceof LinearLayout) {
+            LinearLayout listView = (LinearLayout) tmp;
+            tmp = (View) listView.getParent();
             if (tmp instanceof LinearLayout)
-            {
-                LinearLayout listView = (LinearLayout) tmp;
-                tmp = (View) listView.getParent();
-                if (tmp instanceof LinearLayout)
-                    root = (LinearLayout) tmp;
-            }
-            if (root != null)
-            {
-                bar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
-                root.addView(bar, 0); // insert at top
-            }
-        } else {
-            ViewGroup root = (ViewGroup) dialog.findViewById(android.R.id.content);
-            ListView content = (ListView) root.getChildAt(0);
-            //list = content;
-            root.removeAllViews();
+                root = (LinearLayout) tmp;
+        }
+        if (root != null) {
             bar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
-
-            int height;
-            TypedValue tv = new TypedValue();
-            if (getTheme().resolveAttribute(R.attr.actionBarSize, tv, true)) {
-                height = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
-            }else{
-                height = bar.getHeight();
-            }
-
-            content.setPadding(0, height, 0, 0);
-
-            root.addView(content);
-            root.addView(bar);
+            root.addView(bar, 0); // insert at top
         }
         if (bar == null)
             return;
@@ -491,7 +437,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialogI) {
-                if (AppData.getLoginSuccessful()) {
+                if (AppData.getLoginSuccessful(getApplicationContext())) {
                     dialogI.dismiss();
                 } else {
                     showNotConnectedDialog(dialog);
@@ -501,7 +447,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         bar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (AppData.getLoginSuccessful()) {
+                if (AppData.getLoginSuccessful(getApplicationContext())) {
                     dialog.dismiss();
                 } else {
                     showNotConnectedDialog(dialog);
@@ -535,7 +481,11 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         notConnectedAlert.show();
     }
 
-    private void debug(String msg) { if (DEBUG) { Log.d(TAG, msg); } }
+    private void debug(String msg) {
+        if (DEBUG) {
+            Log.d(TAG, msg);
+        }
+    }
 
     private class StatusReceiver extends BroadcastReceiver {
         private StatusReceiver() {

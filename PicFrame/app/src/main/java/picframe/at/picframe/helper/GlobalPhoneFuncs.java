@@ -33,37 +33,36 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import picframe.at.picframe.activities._MainApp;
 import picframe.at.picframe.settings.AppData;
 
 public class GlobalPhoneFuncs {
     private static List<String> allowedExts = Arrays.asList("jpg", "jpeg", "png");
-    private static FilenameFilter allowedExtsFilter = new FilenameFilter() {
-        @Override
-        public boolean accept(File dir, String filename) {
+
+    private static FilenameFilter getAllowedExtsFilter(Context context) {
+        return (dir, filename) -> {
             File tempfile = new File(dir.getAbsolutePath() + File.separator + filename);
-            filename = filename.substring((filename.lastIndexOf(".") + 1), filename.length());
+            filename = filename.substring((filename.lastIndexOf(".") + 1));
 
             if (allowedExts.contains(filename.toLowerCase())) {
                 return true;
             }
-            return AppData.getRecursiveSearch() && tempfile.isDirectory();
-
-        }
-    };
+            boolean greg = AppData.getRecursiveSearch(context) && tempfile.isDirectory();
+            return AppData.getRecursiveSearch(context) && tempfile.isDirectory();
+        };
+    }
 
     // returns a List with all files in given directory
-    public static List<String> getFileList(String path){
+    public static List<String> getFileList(Context context, String path) {
         List<String> fileArray = new ArrayList<>();
-        if (AppData.getSourceType() == AppData.sourceTypes.ExternalSD) {
-            fileArray = readSdDirectory(path);
-        } else if (AppData.getSourceType() == AppData.sourceTypes.OwnCloud) {
-            fileArray = readSdDirectory(path);
-        } else if (AppData.getSourceType() == AppData.sourceTypes.Dropbox) {
-            fileArray = readSdDirectory(path);
+        if (AppData.getSourceType(context) == AppData.sourceTypes.ExternalSD) {
+            fileArray = readSdDirectory(context, path);
+        } else if (AppData.getSourceType(context) == AppData.sourceTypes.OwnCloud) {
+            fileArray = readSdDirectory(context, path);
+        } else if (AppData.getSourceType(context) == AppData.sourceTypes.Dropbox) {
+            fileArray = readSdDirectory(context, path);
         }
         if (fileArray.isEmpty()) return fileArray;
-        if (AppData.getRandomize()) {
+        if (AppData.getRandomize(context)) {
             Collections.shuffle(fileArray);
         } else {
             Collections.sort(fileArray);
@@ -71,24 +70,26 @@ public class GlobalPhoneFuncs {
         return fileArray;
     }
 
-    private static List<String> readSdDirectory(String path) {
+    private static List<String> readSdDirectory(Context context, String path) {
         File folder = new File(path);
         List<String> fileArray = new ArrayList<>();
-        File[] files = folder.listFiles(allowedExtsFilter);
-        if (files == null) return new ArrayList<>();
+        File[] files = folder.listFiles(getAllowedExtsFilter(context));
+        if (files == null) {
+            return new ArrayList<>();
+        }
         for (File file : files) {
             if (file.isDirectory()) {
-                fileArray.addAll(readSdDirectory(file.toString()));
-                continue;
+                fileArray.addAll(readSdDirectory(context, file.toString()));
+            } else {
+                fileArray.add(file.getAbsolutePath());
             }
-            fileArray.add(file.getAbsolutePath());
         }
         return fileArray;
     }
 
     // Checks whether the given directory has allowed files
-    public static boolean hasAllowedFiles() {
-        List<String> files = readSdDirectory(AppData.getImagePath());
+    public static boolean hasAllowedFiles(Context context) {
+        List<String> files = readSdDirectory(context, AppData.getImagePath(context));
         return !(files.isEmpty());
     }
 
@@ -106,22 +107,21 @@ public class GlobalPhoneFuncs {
 
     // Returns the free sd card memory in bytes
     @SuppressWarnings("deprecation")
-    public static long getSdCardFreeBytes(){
+    public static long getSdCardFreeBytes() {
         StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
         int blockSize = stat.getBlockSize();
         int blocksAvail = stat.getAvailableBlocks();
         long bytesAvail = (long) blocksAvail * (long) blockSize;
-        long bytesAvailable = (long)stat.getBlockSize() * (long)stat.getAvailableBlocks();
+        long bytesAvailable = (long) stat.getBlockSize() * (long) stat.getAvailableBlocks();
         System.err.println("Blocks avail: " + blocksAvail + " -- Blocksize: " + blockSize);
         System.err.println("BytesAvail: " + bytesAvail + " *VS* " + bytesAvailable);
-        System.err.println("MB avail: " + (float) (bytesAvail / (1024*1024)));
-        System.err.println("GB avail: " + (float) (bytesAvail / (1024*1024*1024)));
+        System.err.println("MB avail: " + (float) (bytesAvail / (1024 * 1024)));
+        System.err.println("GB avail: " + (float) (bytesAvail / (1024 * 1024 * 1024)));
         return bytesAvail;
     }
 
-    public static boolean wifiConnected() {
-        NetworkInfo wifi = ((ConnectivityManager) _MainApp.getINSTANCE()
-                .getApplicationContext()
+    public static boolean wifiConnected(Context context) {
+        NetworkInfo wifi = ((ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE))
                 .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         return wifi != null && wifi.isConnected();

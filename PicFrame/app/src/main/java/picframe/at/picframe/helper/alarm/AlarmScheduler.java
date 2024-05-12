@@ -8,7 +8,6 @@ import android.util.Log;
 
 import java.util.GregorianCalendar;
 
-import picframe.at.picframe.activities._MainApp;
 import picframe.at.picframe.activities.MainActivity;
 import picframe.at.picframe.settings.AppData;
 
@@ -17,25 +16,25 @@ import picframe.at.picframe.settings.AppData;
  */
 public class AlarmScheduler {
     private static final String TAG = AlarmScheduler.class.getSimpleName();
-    private static AlarmManager alarmManager;
+    private AlarmManager alarmManager;
+    private Context context;
     private String nextAlarmAsDate;
     Long nextAlarmTime;
 
-    public AlarmScheduler(){
-        if(alarmManager == null)
-            alarmManager = (AlarmManager) _MainApp.getINSTANCE().getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+    public AlarmScheduler(Context context){
+        this.context = context;
+        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
     public Long scheduleAlarm(){
-
         deleteAlarm();
-        if(AppData.getSourceType() != AppData.sourceTypes.OwnCloud
-                || AppData.getUpdateIntervalInHours() == -1)
+        if(AppData.getSourceType(context) != AppData.sourceTypes.OwnCloud
+                || AppData.getUpdateIntervalInHours(context) == -1)
         {
             Log.d(TAG,"NExt alarm: -1");
-            AppData.setNextAlarmTime(-1L);
+            AppData.setNextAlarmTime(context, -1L);
             return -1L;
-        } else if (!AppData.getLoginSuccessful()){
+        } else if (!AppData.getLoginSuccessful(context)){
             return -1L;
         }
 
@@ -44,16 +43,16 @@ public class AlarmScheduler {
 
         Long nextAlarmTime;
         Long currentTime = new GregorianCalendar().getTimeInMillis();
-        nextAlarmTime = AppData.getLastAlarmTime() + AppData.getUpdateIntervalInHours() * 1000 * 60 * 60;
+        nextAlarmTime = AppData.getLastAlarmTime(context) + AppData.getUpdateIntervalInHours(context) * 1000 * 60 * 60;
 
         Log.d(TAG, "currentTime    : "+tc.millisecondsToDate(currentTime));
-        Log.d(TAG, "previousAlarm  : "+tc.millisecondsToDate(AppData.getLastAlarmTime()));
-        Log.d(TAG, "Update Interval: "+String.valueOf(AppData.getUpdateIntervalInHours()));
+        Log.d(TAG, "previousAlarm  : "+tc.millisecondsToDate(AppData.getLastAlarmTime(context)));
+        Log.d(TAG, "Update Interval: "+String.valueOf(AppData.getUpdateIntervalInHours(context)));
         Log.d(TAG, "nextAlarm      : " + tc.millisecondsToDate(nextAlarmTime));
 
         // If no alarm is currently scheduled, or if the time for the next scheduled alarm is passed,
         // download immediately
-        if(AppData.getNextAlarmTime() == -1 || nextAlarmTime < currentTime){
+        if(AppData.getNextAlarmTime(context) == -1 || nextAlarmTime < currentTime){
             Log.d(TAG, tc.millisecondsToDate(nextAlarmTime)+" < "+tc.millisecondsToDate(currentTime));
             Log.d(TAG, "previously scheduled alarm is in the past; start new alarm in 1 minute");
             nextAlarmTime = currentTime + 2 * 1000 * 60;
@@ -62,7 +61,7 @@ public class AlarmScheduler {
         }
 
         setAlarm(nextAlarmTime);
-        AppData.setNextAlarmTime(nextAlarmTime);
+        AppData.setNextAlarmTime(context, nextAlarmTime);
         nextAlarmAsDate = tc.millisecondsToDate(nextAlarmTime);
         System.out.println("Start time: " + tc.millisecondsToDate(currentTime) + " " + (currentTime));
         System.out.println("Go OFF time: " + tc.millisecondsToDate(nextAlarmTime) + " " + nextAlarmTime);
@@ -70,24 +69,24 @@ public class AlarmScheduler {
     }
 
     private void setAlarm (Long nextAlarmTime){
-        Intent intent = new Intent(MainActivity.getContext(),AlarmReceiver.class);
+        Intent intent = new Intent(context, AlarmReceiver.class);
 //        intent.setAction("ACTION_UPDATE_ALARM");
-        alarmManager.set(AlarmManager.RTC_WAKEUP, nextAlarmTime, PendingIntent.getBroadcast(MainActivity.getContext(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+        alarmManager.set(AlarmManager.RTC_WAKEUP, nextAlarmTime, PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT));
     }
 
     private void deleteAlarm(){
         Log.d(TAG, " DELETE ALARMS ");
-        if (MainActivity.getContext() == null)
+        if (context == null)
             return;
-        Intent i = new Intent(MainActivity.getContext(),AlarmReceiver.class);
-        PendingIntent p = PendingIntent.getBroadcast(MainActivity.getContext(), 1, i, 0);
+        Intent i = new Intent(context,AlarmReceiver.class);
+        PendingIntent p = PendingIntent.getBroadcast(context, 1, i, PendingIntent.FLAG_IMMUTABLE);
         alarmManager.cancel(p);
         p.cancel();
     }
 
     public String getNextAlarmAsDate(){
         TimeConverter tc = new TimeConverter();
-        return tc.millisecondsToDate(AppData.getNextAlarmTime());
+        return tc.millisecondsToDate(AppData.getNextAlarmTime(context));
     }
 
 }

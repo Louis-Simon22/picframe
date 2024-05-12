@@ -27,8 +27,8 @@ import android.util.Log;
 import java.util.GregorianCalendar;
 
 import picframe.at.picframe.helper.Keys;
-import picframe.at.picframe.settings.AppData;
 import picframe.at.picframe.service.DownloadService;
+import picframe.at.picframe.settings.AppData;
 
 
 /**
@@ -41,7 +41,6 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
         tc = new TimeConverter();
 
         System.out.println(" ALARMRECEIVER ");
@@ -53,10 +52,10 @@ public class AlarmReceiver extends BroadcastReceiver {
         startDownloadIntent.setAction(Keys.ACTION_STARTDOWNLOAD);
         context.startService(startDownloadIntent);
 
-        AppData.setLastAlarmTime(currentTime);
+        AppData.setLastAlarmTime(context, currentTime);
 
         Log.d(TAG, "Current Time    : " + tc.millisecondsToDate(currentTime));
-        AlarmScheduler alarmScheduler = new AlarmScheduler();
+        AlarmScheduler alarmScheduler = new AlarmScheduler(context);
         Long nextAlarm = alarmScheduler.scheduleAlarm();
         Log.d(TAG, "Next Alarm      : "+tc.millisecondsToDate(nextAlarm));
         Log.d(TAG,"Start time: " + tc.millisecondsToDate(currentTime) + " " + (currentTime));

@@ -6,17 +6,11 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
-
-import com.owncloud.android.lib.common.OwnCloudClient;
-import com.owncloud.android.lib.common.OwnCloudClientFactory;
-import com.owncloud.android.lib.common.OwnCloudCredentialsFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,9 +23,7 @@ import picframe.at.picframe.activities.MainActivity;
 import picframe.at.picframe.helper.GlobalPhoneFuncs;
 import picframe.at.picframe.helper.Keys;
 import picframe.at.picframe.service.downloader.Downloader;
-import picframe.at.picframe.service.downloader.Downloader_OC;
 import picframe.at.picframe.settings.AppData;
-import picframe.at.picframe.settings.SettingsDefaults;
 
 
 public class DownloadService extends Service implements ServiceCallbacks {
@@ -98,7 +90,7 @@ public class DownloadService extends Service implements ServiceCallbacks {
         if (!downloading) {
             // check for problems only in mainactivity (after settings changed) (checkForProblemsAndShowToasts)
             // since at this point we are mostly sure to not run into problems, we check for wifi
-            if (!GlobalPhoneFuncs.wifiConnected()) {
+            if (!GlobalPhoneFuncs.wifiConnected(getApplicationContext())) {
                 stopForeground(false);
                 downloadFailed(Downloader.Failure.WIFI);
                 return Service.START_NOT_STICKY;
@@ -115,15 +107,14 @@ public class DownloadService extends Service implements ServiceCallbacks {
             /* create downloader object according to selected type */
             // if type is external sd, no download should happen (should never be the case)
             AppData.sourceTypes tmpSource;
-            tmpSource = AppData.getSourceType();
+            tmpSource = AppData.getSourceType(getApplicationContext());
             if (AppData.sourceTypes.ExternalSD.equals(tmpSource)) {
                 Log.d(TAG, "FAILURE! DownloadService started, while SD Card is selected");
                 stopSelf();
                 return Service.START_NOT_STICKY;
-            } else if (AppData.sourceTypes.OwnCloud.equals(tmpSource)) {
-                args = setUpOcClientArguments();
-                downloader = new Downloader_OC(args);
-            } // else if (AppData.sourceTypes.Dropbox.equals(tmpSource) {}    //  TODO Dropbox
+            }
+            // else if (AppData.sourceTypes.OwnCloud.equals(tmpSource)) {} // TODO Owncloud
+            // else if (AppData.sourceTypes.Dropbox.equals(tmpSource) {} //  TODO Dropbox
             if (args == null) {
                 Log.d(TAG, "Arguments cannot be null, aborting!");
                 downloadFailed(Downloader.Failure.LOGIN);
@@ -209,35 +200,6 @@ public class DownloadService extends Service implements ServiceCallbacks {
             }
         }
         return true;
-    }
-
-    private HashMap<String, Object> setUpOcClientArguments() {
-        OwnCloudClient mClientOwnCloud;
-
-        Uri serverUri = Uri.parse(AppData.getSourcePath());
-        if (AppData.getUserName().equals(SettingsDefaults.getDefaultValueForKey(R.string.sett_key_username)) ||
-                AppData.getUserPassword().equals(SettingsDefaults.getDefaultValueForKey(R.string.sett_key_password)) ||
-                AppData.getSourcePath().equals(SettingsDefaults.getDefaultValueForKey(R.string.sett_key_srcpath_owncloud)) ||
-                AppData.getSourcePath().equals("") ||
-                serverUri == null) {
-            return null;
-        }
-        if (DEBUG) Log.i(TAG, "OwnCloud serverUri: " + serverUri);
-        // Create client object to perform remote operations
-        mClientOwnCloud = OwnCloudClientFactory.createOwnCloudClient(serverUri, getApplicationContext(), true);
-        mClientOwnCloud.setCredentials(
-                OwnCloudCredentialsFactory.newBasicCredentials(
-                        AppData.getUserName(),
-                        AppData.getUserPassword()
-                )
-        );
-        args.put(Downloader_OC.CLIENT, mClientOwnCloud);
-        args.put(Downloader_OC.HANDLER, new Handler());
-        args.put(Keys.PICFRAMEPATH, AppData.getExtFolderAppRoot());
-        args.put(Keys.CONTEXT, getApplicationContext());
-    //    args.put(Downloader_OC.REMOTEFOLDER,   settObj. getRemoteFolderPath); TODO FOLDERPICKER STUFF
-        args.put(Keys.CALLBACK, this);
-        return args;
     }
 
     // to stop download from notification - download->false, interrupt downloader

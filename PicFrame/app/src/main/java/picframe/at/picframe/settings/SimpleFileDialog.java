@@ -24,13 +24,6 @@ package picframe.at.picframe.settings;
 *   => heavily deleted/cleared/modified
 */
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -40,6 +33,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import picframe.at.picframe.R;
 import picframe.at.picframe.helper.local_storage.SD_Card_Helper;
 
@@ -104,7 +105,7 @@ public class SimpleFileDialog {
         m_dir = dir;
         m_subdirs = getDirectories(dir);
 
-        class SimpleFileDialogOnClickListener implements DialogInterface.OnClickListener {
+        class SimpleFileDialogOnClickListener implements OnClickListener {
             public void onClick(DialogInterface dialog, int item) {
                 String sel = "" + ((AlertDialog) dialog).getListView().getAdapter().getItem(item);
                 if (sel.charAt(sel.length()-1) == '/')	sel = sel.substring(0, sel.length()-1);

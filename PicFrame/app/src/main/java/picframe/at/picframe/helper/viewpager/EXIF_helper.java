@@ -1,13 +1,14 @@
 package picframe.at.picframe.helper.viewpager;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
-import android.media.ExifInterface;
-import java.io.IOException;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.view.Display;
 import android.view.WindowManager;
+
+import java.io.IOException;
 
 /**
  * Created by ClemensH on 06.04.2015.

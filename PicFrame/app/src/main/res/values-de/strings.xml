@@ -110,7 +110,7 @@
     <string name="sett_loginCheck_failure">Fehlgeschlagen</string>
     <string name="sett_loginCheck_success">Erfolgreich</string>
     <string name="ownCloud">Status - ownCloud</string>
-    <string name="status_local">Status - Allgemein</string>
+    <string name="status_local">Status</string>
     <string name="sett_toast_loginFailure">Login fehlgeschlagen</string>
     <string name="sett_toast_loginSuccess">Login erfolgreich</string>
     <string name="sett_toast_wrongUrl">Unerlaubtes Zeichen am Ende der URL: \'/\'. URL wird nicht gespeichert.</string>

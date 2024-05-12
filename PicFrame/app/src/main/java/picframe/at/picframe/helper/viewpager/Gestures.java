@@ -2,9 +2,9 @@ package picframe.at.picframe.helper.viewpager;
 
 import android.content.Context;
 import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.GestureDetector.SimpleOnGestureListener;
 
 /**
  * Created by ussher on 02.05.15.

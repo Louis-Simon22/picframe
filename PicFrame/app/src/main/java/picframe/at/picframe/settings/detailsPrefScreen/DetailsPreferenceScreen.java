@@ -37,7 +37,8 @@ public class DetailsPreferenceScreen {
 
     private void fetchCorrectDetailsPrefScreen() {
         if (AppData.sourceTypes.OwnCloud.equals(mSrcType)) {
-            detailsPreferenceScreen = new OwnCloudPrefs(mSettAct);
+            // TODO
+            //detailsPreferenceScreen = new
         } else if (AppData.sourceTypes.Dropbox.equals(mSrcType)) {
             // TODO
             //detailsPreferenceScreen = new
