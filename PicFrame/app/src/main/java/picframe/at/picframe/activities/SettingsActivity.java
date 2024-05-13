@@ -22,16 +22,10 @@ package picframe.at.picframe.activities;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -39,26 +33,19 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
-
-import androidx.appcompat.widget.Toolbar;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import java.io.File;
+import androidx.appcompat.widget.Toolbar;
+
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 import picframe.at.picframe.R;
-import picframe.at.picframe.helper.GlobalPhoneFuncs;
-import picframe.at.picframe.helper.Keys;
-import picframe.at.picframe.helper.alarm.AlarmScheduler;
 import picframe.at.picframe.settings.AppData;
 import picframe.at.picframe.settings.MySwitchPref;
 import picframe.at.picframe.settings.detailsPrefScreen.DetailsPreferenceScreen;
@@ -69,13 +56,9 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
     private PreferenceCategory preferenceCategory;
-    private AlarmScheduler alarmScheduler;
     private SharedPreferences sharedPreferences;
-    private ArrayList<String> editableTitleFields = new ArrayList<>();
-    private ArrayList<String> fieldsToRemove = new ArrayList<>();
-    private StatusReceiver receiver;
-    private LocalBroadcastManager broadcastManager;
-    private DetailsPreferenceScreen detailsPrefScreenToAdd;
+    private final ArrayList<String> editableTitleFields = new ArrayList<>();
+    private final ArrayList<String> fieldsToRemove = new ArrayList<>();
     private final static boolean DEBUG = true;
 
     @Override
@@ -108,32 +91,6 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         for (String e : keyMap.keySet()) {
             debug("DUMP| Key: " + e + " ++ Value: " + keyMap.get(e));
         }
-
-        alarmScheduler = new AlarmScheduler(getApplicationContext());
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (broadcastManager == null) {
-            broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        }
-        if (receiver == null) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Keys.ACTION_LOGINSTATUSSUCCESS);
-            filter.addAction(Keys.ACTION_LOGINSTATUSFAILURE);
-            filter.addCategory(Intent.CATEGORY_DEFAULT);
-            receiver = new StatusReceiver();
-            broadcastManager.registerReceiver(receiver, filter);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        broadcastManager.unregisterReceiver(receiver);
-        receiver = null;
     }
 
     @Override
@@ -154,13 +111,9 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     private void populateEditableFieldsList() {
         editableTitleFields.add(getString(R.string.sett_key_displaytime));
         editableTitleFields.add(getString(R.string.sett_key_transition));
-        editableTitleFields.add(getString(R.string.sett_key_srctype));
         editableTitleFields.add(getString(R.string.sett_key_srcpath_sd));
         editableTitleFields.add(getString(R.string.sett_key_username));
         editableTitleFields.add(getString(R.string.sett_key_password));
-        editableTitleFields.add(getString(R.string.sett_key_srcpath_owncloud));
-        editableTitleFields.add(getString(R.string.sett_key_downloadInterval));
-        editableTitleFields.add(getString(R.string.sett_key_loginCheckButton));
     }
 
     private void populateFieldsToRemove() {
@@ -180,21 +133,8 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
             updateFieldTitle(key);
             if (getString(R.string.sett_key_srctype).equals(key)) {
                 createCat2Fields();
-                alarmScheduler.scheduleAlarm();
-            } else if (getString(R.string.sett_key_username).equals(key) ||
-                    getString(R.string.sett_key_password).equals(key) ||
-                    getString(R.string.sett_key_srcpath_owncloud).equals(key)) {
-                setLoginStatus(false);
-            } else if (getString(R.string.sett_key_loginCheckButton).equals(key) ||
-                    getString(R.string.sett_key_downloadInterval).equals(key)) {
-                alarmScheduler.scheduleAlarm();
             }
         }
-    }
-
-    private void setLoginStatus(boolean status) {
-        AppData.setLoginSuccessful(getApplicationContext(), status);
-        // TODO: change layout (status view)
     }
 
     public void updateAllFieldTitles() {
@@ -212,7 +152,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
             if (mPref instanceof ListPreference) {
 //                mPrefValue = ((ListPreference)mPref).getEntry() == null ? "" :  ((ListPreference)mPref).getEntry().toString();
                 mPrefValue = (String) sharedPreferences.getAll().get(key);
-                if (mPrefValue != ((ListPreference) mPref).getValue()) {
+                if (!Objects.equals(mPrefValue, ((ListPreference) mPref).getValue())) {
                     ((ListPreference) mPref).setValue(mPrefValue);
                 }
                 int index = ((ListPreference) mPref).findIndexOfValue(mPrefValue);
@@ -220,17 +160,13 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
             } else if (mPref instanceof EditTextPreference) {
                 mPrefValue = (String) sharedPreferences.getAll().get(key);
 //                mPrefValue = ((EditTextPreference)mPref).getText();
-                if (getString(R.string.sett_key_password).equals(key) && mPrefValue != null && !mPrefValue.equals("")) {
+                if (getString(R.string.sett_key_password).equals(key) && mPrefValue != null && !mPrefValue.isEmpty()) {
                     //noinspection ReplaceAllDot
                     mPrefValue = mPrefValue.replaceAll(".", "*");
                 }
-            } else {
-                if (getString(R.string.sett_key_srcpath_sd).equals(mPref.getKey()) &&
-                        AppData.sourceTypes.ExternalSD.equals(AppData.getSourceType(getApplicationContext()))) {
-                    mPrefValue = AppData.getSourcePath(getApplicationContext());
-                } else if (getString(R.string.sett_key_loginCheckButton).equals(mPref.getKey())) {
-                    mPrefValue = AppData.getLoginSuccessful(getApplicationContext()) ? getString(R.string.sett_loginCheck_success) : getString(R.string.sett_loginCheck_failure);
-                }
+            } else if (getString(R.string.sett_key_srcpath_sd).equals(mPref.getKey()) &&
+                    AppData.sourceTypes.ExternalSD.equals(AppData.getSourceType(getApplicationContext()))) {
+                mPrefValue = AppData.getSourcePath(getApplicationContext());
             }
             if (getString(R.string.sett_key_displaytime).equals(key)) {
                 mPrefTitle = getString(R.string.sett_displayTime);
@@ -246,8 +182,6 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                 mPrefTitle = getString(R.string.sett_password);
             } else if (getString(R.string.sett_key_srcpath_owncloud).equals(key)) {
                 mPrefTitle = getString(R.string.sett_srcPath_OwnCloud);
-            } else if (getString(R.string.sett_key_downloadInterval).equals(key)) {
-                mPrefTitle = getString(R.string.sett_downloadInterval);
             } else if (getString(R.string.sett_key_loginCheckButton).equals(key)) {
                 mPrefTitle = getString(R.string.sett_loginCheck);
             }
@@ -260,7 +194,6 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         // add PreferenceScreens depending on which sourceType
         setDetailsPrefScreen();
         setIncludeSubdirsSwitchPref();
-        setDeleteDataButton();
         setResetToDefaultButton();
     }
 
@@ -284,7 +217,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 
     public void setDetailsPrefScreen() {
         if (AppData.sourceTypes.OwnCloud == AppData.getSourceType(getApplicationContext())) {
-            detailsPrefScreenToAdd = new DetailsPreferenceScreen(
+            DetailsPreferenceScreen detailsPrefScreenToAdd = new DetailsPreferenceScreen(
                     AppData.getSrcTypeInt(getApplicationContext()),
                     getPreferenceManager().createPreferenceScreen(this),
                     SettingsActivity.this);
@@ -301,16 +234,9 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     }
 
     private void setIncludeSubdirsSwitchPref() {
-        Preference myRecCheckbox;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            myRecCheckbox = new CheckBoxPreference(this);
-            ((CheckBoxPreference) myRecCheckbox).setSummaryOff(R.string.sett_recursiveSearchSummOff);
-            ((CheckBoxPreference) myRecCheckbox).setSummaryOn(R.string.sett_recursiveSearchSummOn);
-        } else {
-            myRecCheckbox = new MySwitchPref(this);
-            ((MySwitchPref) myRecCheckbox).setSummaryOff(R.string.sett_recursiveSearchSummOff);
-            ((MySwitchPref) myRecCheckbox).setSummaryOn(R.string.sett_recursiveSearchSummOn);
-        }
+        MySwitchPref myRecCheckbox = new MySwitchPref(this);
+        myRecCheckbox.setSummaryOff(R.string.sett_recursiveSearchSummOff);
+        myRecCheckbox.setSummaryOn(R.string.sett_recursiveSearchSummOn);
         myRecCheckbox.setTitle(R.string.sett_recursiveSearch);
         myRecCheckbox.setSummary(R.string.sett_recursiveSearchSumm);
         myRecCheckbox.setDefaultValue(true);
@@ -320,67 +246,32 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         }
     }
 
-    private void setDeleteDataButton() {
-        Preference myDelDataButton = new Preference(this);
-        myDelDataButton.setTitle(R.string.sett_deleteData);
-        myDelDataButton.setSummary(R.string.sett_deleteDataSumm);
-        myDelDataButton.setKey(getString(R.string.sett_key_deleteData));
-        myDelDataButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                AlertDialog.Builder ensureDialogB = new AlertDialog.Builder(SettingsActivity.this);
-                ensureDialogB
-                        .setCancelable(false)
-                        .setMessage(R.string.sett_deleteDataDialog_msg)
-                        .setNegativeButton(R.string.sett_deleteDataDialog_negBtn, null)
-                        .setPositiveButton(R.string.sett_deleteDataDialog_posBtn, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(SettingsActivity.this, R.string.sett_toast_delFiles, Toast.LENGTH_SHORT).show();
-                                GlobalPhoneFuncs.recursiveDeletionInBackgroundThread(
-                                        new File(AppData.getExtFolderAppRoot()),
-                                        false);
-                            }
-                        });
-                ensureDialogB.show();
-                return true;
-            }
-        });
-        if (preferenceCategory != null) {
-            preferenceCategory.addPreference(myDelDataButton);
-        }
-    }
-
     public void setResetToDefaultButton() {
         Preference myResetButton = new Preference(this);
         myResetButton.setTitle(R.string.sett_resetTitle);
         myResetButton.setSummary(R.string.sett_resetSummary);
         myResetButton.setKey(getString(R.string.sett_key_restoreDefaults));
-        myResetButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                AlertDialog.Builder ensureDialogB = new AlertDialog.Builder(SettingsActivity.this);
-                ensureDialogB
-                        .setCancelable(false)
-                        .setMessage(R.string.sett_confirmationDialogMessage)
-                        .setNegativeButton(R.string.sett_no, null)
-                        .setPositiveButton(R.string.sett_yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                debug("in click on yes!");
-                                resetSettingsToDefault();
-                                Toast.makeText(SettingsActivity.this, R.string.sett_toast_reset, Toast.LENGTH_SHORT).show();
-                                updateAllFieldTitles();
-                            }
-                        });
-                ensureDialogB.show();
-                return true;
-            }
+        myResetButton.setOnPreferenceClickListener(preference -> {
+            AlertDialog.Builder ensureDialogB = new AlertDialog.Builder(SettingsActivity.this);
+            ensureDialogB
+                    .setCancelable(false)
+                    .setMessage(R.string.sett_confirmationDialogMessage)
+                    .setNegativeButton(R.string.sett_no, null)
+                    .setPositiveButton(R.string.sett_yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            debug("in click on yes!");
+                            resetSettingsToDefault();
+                            Toast.makeText(SettingsActivity.this, R.string.sett_toast_reset, Toast.LENGTH_SHORT).show();
+                            updateAllFieldTitles();
+                        }
+                    });
+            ensureDialogB.show();
+            return true;
         });
         if (preferenceCategory != null) {
             preferenceCategory.addPreference(myResetButton);
         }
-
     }
 
     public void resetSettingsToDefault() {
@@ -401,10 +292,6 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         }
         updateAllFieldTitles();
         return false;
-    }
-
-    public ViewGroup getStatusView() {
-        return detailsPrefScreenToAdd.getStatusViewGroup();
     }
 
     /************************************************************************************
@@ -432,79 +319,12 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         }
         if (bar == null)
             return;
-        //list.addView(detailsPrefScreenToAdd.getStatusViewGroup(), 1); //TODO
         bar.setTitle(preferenceScreen.getTitle());
-        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogI) {
-                if (AppData.getLoginSuccessful(getApplicationContext())) {
-                    dialogI.dismiss();
-                } else {
-                    showNotConnectedDialog(dialog);
-                }
-            }
-        });
-        bar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (AppData.getLoginSuccessful(getApplicationContext())) {
-                    dialog.dismiss();
-                } else {
-                    showNotConnectedDialog(dialog);
-                }
-            }
-        });
-    }
-
-    private void showNotConnectedDialog(final Dialog dialog) {
-        AlertDialog notConnectedAlert = new AlertDialog.Builder(SettingsActivity.this)
-                .setMessage(R.string.sett_dialog_notConnected_message)
-                .setPositiveButton(R.string.sett_yes,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialog.dismiss();
-                                dialogInterface.dismiss();
-                            }
-                        })
-                .setNegativeButton(R.string.sett_no,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                                dialog.show();
-                            }
-                        })
-                .create();
-        notConnectedAlert.getWindow().setGravity(Gravity.CENTER);
-        notConnectedAlert.setCancelable(false);
-        notConnectedAlert.show();
     }
 
     private void debug(String msg) {
         if (DEBUG) {
             Log.d(TAG, msg);
-        }
-    }
-
-    private class StatusReceiver extends BroadcastReceiver {
-        private StatusReceiver() {
-
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null) {
-                if (Keys.ACTION_LOGINSTATUSSUCCESS.equals(intent.getAction())) {
-                    debug("received 'loginSuccess' action via broadcast");
-                    Toast.makeText(getApplicationContext(), R.string.sett_toast_loginSuccess, Toast.LENGTH_SHORT).show();
-//TODO
-                } else if (Keys.ACTION_LOGINSTATUSFAILURE.equals(intent.getAction())) {
-                    debug("received 'loginFailure' action via boadcast");
-                    Toast.makeText(getApplicationContext(), R.string.sett_toast_loginFailure, Toast.LENGTH_SHORT).show();
-//TODO
-                }
-            }
         }
     }
 }

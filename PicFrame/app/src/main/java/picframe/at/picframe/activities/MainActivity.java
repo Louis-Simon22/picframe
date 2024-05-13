@@ -20,6 +20,8 @@
 
 package picframe.at.picframe.activities;
 
+import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -27,12 +29,22 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.os.Handler;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.ActivityResultRegistry;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -82,13 +94,14 @@ import picframe.at.picframe.settings.AppData;
 public class MainActivity extends AppCompatActivity {
 
     private final static boolean DEBUG = true;
+    final static int APP_STORAGE_ACCESS_REQUEST_CODE = 501;
     private static final String TAG = MainActivity.class.getSimpleName();
     private ResponseReceiver receiver;
     LocalBroadcastManager broadcastManager;
 
     private ImagePagerAdapter imagePagerAdapter;
     private CustomViewPager pager;
-    private final long countdownIntervalInMilliseconds = 2*60*1000-50; // interval to slightly less than 2 minutes
+    private final long countdownIntervalInMilliseconds = 2 * 60 * 1000 - 50; // interval to slightly less than 2 minutes
     private CountDownTimer countDownTimer;
 
     private String mOldPath;
@@ -169,8 +182,6 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("STARTING PAGE  " + currentPage);
 
         rightToLeft = AppData.getDirection(getApplicationContext());
-
-        new AlarmScheduler(getApplicationContext()).scheduleAlarm();
     }
 
     @Override
@@ -187,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
         supportInvalidateOptionsMenu();
         if (AppData.getFirstAppStart(getApplicationContext())) {
             AppData.setFirstAppStart(getApplicationContext(), false);
-            AppData.setTutorial(getApplicationContext(), true);
         }
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -207,23 +217,9 @@ public class MainActivity extends AppCompatActivity {
             broadcastManager.registerReceiver(receiver, filter);
         }
 
-        if(GlobalPhoneFuncs.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext())).size() > 0) {
-            if (!AppData.getImagePath(getApplicationContext()).equals(mOldPath) || mOldRecursive != AppData.getRecursiveSearch(getApplicationContext())) {
-                loadAdapter();
-            }
-        }
-
-        updateFileList();
-
-        // start on the page we left in onPause, unless it was the first or last picture (as this freezes the slideshow)
-        if(currentPage < pager.getAdapter().getCount() -1 && currentPage > 0) {
-            pager.setCurrentItem(currentPage);
-        }
-
-        setUpSlideShow();
-
-        if(AppData.getSlideshow(getApplicationContext()) && !paused){
-            startSlideshowCountDown();
+        if (!Environment.isExternalStorageManager()) {
+            Intent intent = new Intent(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + getApplicationContext().getPackageName()));
+            startActivityForResult(intent, APP_STORAGE_ACCESS_REQUEST_CODE);
         }
     }
 
@@ -276,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
         // unregister receiver, because if the activity is not in focus, we want no UI updates
         broadcastManager.unregisterReceiver(receiver);
         receiver = null;
-        if(click_on_settings_dialog != null){
+        if (click_on_settings_dialog != null) {
             click_on_settings_dialog.cancel();
             click_on_settings_dialog.dismiss();
         }
@@ -335,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
         // Save the current Page to resume after next start
         // maybe not right here will test
@@ -344,17 +340,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Save the direction of the pageviewer
         AppData.setDirection(getApplicationContext(), rightToLeft);
-    }
-
-    private void setUpSlideShow(){
-        if (AppData.getSlideshow(getApplicationContext())){
-            pager.setScrollDurationFactor(8);
-//            pager.setPagingEnabled(false);
-        }
-        else{
-            pager.setScrollDurationFactor(3);
-//            pager.setPagingEnabled(true);
-        }
     }
 
     @Override
@@ -402,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
                 imgDisplay.setScaleType(ImageView.ScaleType.FIT_CENTER);
             }
             this.localpage = position;
-            if(!showExamplePictures){
+            if (!showExamplePictures) {
                 imgDisplay.setImageBitmap(EXIF_helper.decodeFile(mFilePaths.get(this.localpage), getApplicationContext()));
             } else {
                 String currentImage = "ex" + this.localpage;
@@ -421,6 +406,7 @@ public class MainActivity extends AppCompatActivity {
                         getSupportActionBar().hide();
                     }
                 }
+
                 @Override
                 public void onTap() {
                     if (AppData.getSlideshow(getApplicationContext())) {
@@ -457,40 +443,80 @@ public class MainActivity extends AppCompatActivity {
             setSize();
         }
 
-        public int getPage(){
+        public int getPage() {
             return this.localpage;
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == APP_STORAGE_ACCESS_REQUEST_CODE && Environment.isExternalStorageManager()) {
+            startSlideshow();
+        } else {
+            // TODO show toast saying we can't do anything
+        }
+    }
+
+    private void setUpSlideShow() {
+        if (AppData.getSlideshow(getApplicationContext())) {
+            pager.setScrollDurationFactor(8);
+//            pager.setPagingEnabled(false);
+        } else {
+            pager.setScrollDurationFactor(3);
+//            pager.setPagingEnabled(true);
+        }
+    }
+
+    private void startSlideshow() {
+        if (!GlobalPhoneFuncs.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext())).isEmpty()) {
+            if (!AppData.getImagePath(getApplicationContext()).equals(mOldPath) || mOldRecursive != AppData.getRecursiveSearch(getApplicationContext())) {
+                loadAdapter();
+            }
+        }
+
+        updateFileList();
+
+        // start on the page we left in onPause, unless it was the first or last picture (as this freezes the slideshow)
+        if (currentPage < pager.getAdapter().getCount() - 1 && currentPage > 0) {
+            pager.setCurrentItem(currentPage);
+        }
+
+        setUpSlideShow();
+
+        if (AppData.getSlideshow(getApplicationContext()) && !paused) {
+            startSlideshowCountDown();
+        }
+    }
+
     public void updateFileList() {
-        if(AppData.getImagePath(getApplicationContext()).equals("")) {
+        if (AppData.getImagePath(getApplicationContext()).equals("")) {
             showExamplePictures = true;
-            Toast.makeText(getApplicationContext(),R.string.main_toast_noFolderPathSet, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), R.string.main_toast_noFolderPathSet, Toast.LENGTH_SHORT).show();
         } else {
             mFilePaths = GlobalPhoneFuncs.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
             showExamplePictures = mFilePaths.isEmpty() || mFilePaths.size() <= 0;
             if (showExamplePictures) {
-                Toast.makeText(getApplicationContext(),R.string.main_toast_noFileFound, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), R.string.main_toast_noFileFound, Toast.LENGTH_SHORT).show();
             }
         }
         setSize(); // size is count of images in folder, or constant if example pictures are used
         imagePagerAdapter.notifyDataSetChanged();
     }
 
-    private void loadAdapter(){
+    private void loadAdapter() {
         imagePagerAdapter = new ImagePagerAdapter(MainActivity.this);
 //        pager.setPagingEnabled(true);
 //        setUp = new DisplayImages(MainActivity.this);
         try {
             pager.setAdapter(imagePagerAdapter);
             currentPage = imagePagerAdapter.getPage();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void enableGestures(){
+    private void enableGestures() {
         mainLayout.setOnTouchListener(new Gestures(getApplicationContext()) {
             @Override
             public void onSwipeBottom() {
@@ -548,33 +574,33 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    public void selectTransformer(){
-        if(AppData.getSlideshow(getApplicationContext()) && AppData.getTransitionStyle(getApplicationContext()) == 11){
-            pager.setPageTransformer(true,transformers.get(random()));
-        } else if(AppData.getSlideshow(getApplicationContext())){
-            pager.setPageTransformer(true,transformers.get(AppData.getTransitionStyle(getApplicationContext())));
+    public void selectTransformer() {
+        if (AppData.getSlideshow(getApplicationContext()) && AppData.getTransitionStyle(getApplicationContext()) == 11) {
+            pager.setPageTransformer(true, transformers.get(random()));
+        } else if (AppData.getSlideshow(getApplicationContext())) {
+            pager.setPageTransformer(true, transformers.get(AppData.getTransitionStyle(getApplicationContext())));
         } else {
-            pager.setPageTransformer(true,new ZoomOutPageTransformer());
+            pager.setPageTransformer(true, new ZoomOutPageTransformer());
         }
     }
 
-    private int random(){
+    private int random() {
         //Random from 0 to 13
-        return (int)(Math.random() * 11);
+        return (int) (Math.random() * 11);
     }
 
-    private void setSize(){
-        if(!showExamplePictures)
+    private void setSize() {
+        if (!showExamplePictures)
             size = mFilePaths.size();
         else
             size = nbOfExamplePictures;
     }
 
-    private Intent getSettingsActivityIntent(){
+    private Intent getSettingsActivityIntent() {
         return new Intent(this, SettingsActivity.class);
     }
 
-    private void initializeTransitions(){
+    private void initializeTransitions() {
         transformers = new ArrayList<>();
         this.transformers.add(new AccordionTransformer());
         this.transformers.add(new BackgroundToForegroundTransformer());
@@ -589,7 +615,7 @@ public class MainActivity extends AppCompatActivity {
         this.transformers.add(new ZoomOutPageTransformer());
     }
 
-    private void tutorial (){
+    private void tutorial() {
         if (!AppData.getTutorial(getApplicationContext())) {
             return;
         }
@@ -606,7 +632,7 @@ public class MainActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                AppData.setTutorial(getApplicationContext(),false);
+                                AppData.setTutorial(getApplicationContext(), false);
                             }
                         })
                 .setNegativeButton(R.string.main_dialog_tutorial_openSettingsNowButton,
@@ -672,9 +698,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void startSlideshowCountDown() {
         debug("startSlideshowCountDown");
-        if(remainingDisplayTime != 0 && remainingDisplayTime < AppData.getDisplayTime(getApplicationContext())) {
-            debug("remainingDisplayTime: " + remainingDisplayTime + " < " + AppData.getDisplayTime(getApplicationContext())+", displayTime");
-            countDownTimer = new CountDownTimer((AppData.getDisplayTime(getApplicationContext())-remainingDisplayTime)*1000, countdownIntervalInMilliseconds) {
+        if (remainingDisplayTime != 0 && remainingDisplayTime < AppData.getDisplayTime(getApplicationContext())) {
+            debug("remainingDisplayTime: " + remainingDisplayTime + " < " + AppData.getDisplayTime(getApplicationContext()) + ", displayTime");
+            countDownTimer = new CountDownTimer((AppData.getDisplayTime(getApplicationContext()) - remainingDisplayTime) * 1000, countdownIntervalInMilliseconds) {
                 @Override
                 public void onTick(long l) {
                     debug("unique tick!" + l / 1000);
@@ -697,10 +723,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void startRepeatingCountDowns() {
         debug("startRepeatingCountDowns");
-        countDownTimer = new CountDownTimer(AppData.getDisplayTime(getApplicationContext())*1000, countdownIntervalInMilliseconds) {
+        countDownTimer = new CountDownTimer(AppData.getDisplayTime(getApplicationContext()) * 1000, countdownIntervalInMilliseconds) {
             @Override
             public void onTick(long l) {
-                remainingDisplayTime = l/1000;
+                remainingDisplayTime = l / 1000;
                 debug("tick!" + remainingDisplayTime);
             }
 
@@ -712,18 +738,18 @@ public class MainActivity extends AppCompatActivity {
         }.start();
     }
 
-    private void cancelSlideShowCoundown(){
+    private void cancelSlideShowCoundown() {
         /* remainingg display time is always imprecise, the real value located somewhere between
             0 and countdownIntervalInMilliseconds.
             If the display time is smaller than countdownIntervalInMilliseconds/1000,
             then the value of countdownIntervalInMilliseconds will never change, and resetting
             the value will be more accurate.
          */
-        if(AppData.getDisplayTime(getApplicationContext()) < countdownIntervalInMilliseconds/1000) {
-            debug(AppData.getDisplayTime(getApplicationContext()) + " < " + countdownIntervalInMilliseconds/1000);
+        if (AppData.getDisplayTime(getApplicationContext()) < countdownIntervalInMilliseconds / 1000) {
+            debug(AppData.getDisplayTime(getApplicationContext()) + " < " + countdownIntervalInMilliseconds / 1000);
             remainingDisplayTime = 0;
         }
-        if(countDownTimer != null){
+        if (countDownTimer != null) {
             countDownTimer.cancel();
         }
     }

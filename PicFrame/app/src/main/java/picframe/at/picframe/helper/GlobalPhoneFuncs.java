@@ -105,21 +105,6 @@ public class GlobalPhoneFuncs {
         return Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
     }
 
-    // Returns the free sd card memory in bytes
-    @SuppressWarnings("deprecation")
-    public static long getSdCardFreeBytes() {
-        StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-        int blockSize = stat.getBlockSize();
-        int blocksAvail = stat.getAvailableBlocks();
-        long bytesAvail = (long) blocksAvail * (long) blockSize;
-        long bytesAvailable = (long) stat.getBlockSize() * (long) stat.getAvailableBlocks();
-        System.err.println("Blocks avail: " + blocksAvail + " -- Blocksize: " + blockSize);
-        System.err.println("BytesAvail: " + bytesAvail + " *VS* " + bytesAvailable);
-        System.err.println("MB avail: " + (float) (bytesAvail / (1024 * 1024)));
-        System.err.println("GB avail: " + (float) (bytesAvail / (1024 * 1024 * 1024)));
-        return bytesAvail;
-    }
-
     public static boolean wifiConnected(Context context) {
         NetworkInfo wifi = ((ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE))

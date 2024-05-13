@@ -31,7 +31,7 @@ public class SD_Card_Helper {
         // If there's only one internal SD-card, return path to it.
 
         // If there are no sd-cards, return path to external_storage
-        if(hasSDCard()){ // hasSDCard also fill in the valus of root if needed
+        if(hasSDCard()){ // hasSDCard also fill in the values of root if needed
             // Compute full list for debugging purposes only
             ArrayList<String> list = new ArrayList<>();
             for (File root : roots) {

@@ -75,16 +75,6 @@ public class SimpleFileDialog {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////
-    // chooseFile_or_Dir() - load directory chooser dialog for initial
-    // default sdcard directory
-    ///////////////////////////////////////////////////////////////////////
-    public void chooseFile_or_Dir() {
-        // Initial directory is sdcard directory
-        if (m_dir.equals(""))	chooseFile_or_Dir(m_sdcardDirectory);
-        else chooseFile_or_Dir(m_dir);
-    }
-
     ////////////////////////////////////////////////////////////////////////////////
     // chooseFile_or_Dir(String dir) - load directory chooser dialog for initial
     // input 'dir' directory

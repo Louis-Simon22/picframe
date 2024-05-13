@@ -43,7 +43,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.owncloud.android.lib.test_project.TestActivity"
+            android:name="picframe.at.picframe.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

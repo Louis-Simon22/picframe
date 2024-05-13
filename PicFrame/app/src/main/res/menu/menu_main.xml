@@ -6,20 +6,5 @@
         android:id="@+id/action_settings"
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/action_settings"
-        android:orderInCategory="100"
-        app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/action_download"
-        android:icon="@android:drawable/stat_notify_sync_noanim"
-        android:title="@string/action_downloadNow"
-        android:orderInCategory="150"
-        android:visible="false"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_about"
-        android:icon="@android:drawable/ic_menu_info_details"
-        android:title="@string/action_about"
-        android:orderInCategory="200"
-        app:showAsAction="ifRoom" />
-
+        app:showAsAction="always" />
 </menu>

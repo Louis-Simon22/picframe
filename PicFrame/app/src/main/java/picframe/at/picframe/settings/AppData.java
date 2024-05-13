@@ -151,22 +151,8 @@ public class AppData {
     // holds the root-path to the displayed images
     public static String getImagePath(Context context) {
         sourceTypes tmpType = getSourceType(context);
-        if (sourceTypes.ExternalSD.equals(tmpType)) {
-            return getSharedPreferences(context).getString(context.getString(R.string.sett_key_srcpath_sd),
-                    (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_srcpath_sd));
-        } else {
-            return getExtFolderDisplayPath();
-        }
-    }
-
-    // get flag whether the last loginCheck for a server was successful or not
-    public static boolean getLoginSuccessful(Context context) {
-        return getSharedPreferences(context).getBoolean(context.getString(R.string.sett_key_recursiveSearch), false);
-    }
-
-    // set flag whether the last loginCheck for a server is successful or not
-    public static void setLoginSuccessful(Context context, boolean loginSuccess) {
-        getSharedPreferences(context).edit().putBoolean(context.getString(R.string.sett_key_loginCheckButton), loginSuccess).commit();
+        return getSharedPreferences(context).getString(context.getString(R.string.sett_key_srcpath_sd),
+                (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_srcpath_sd));
     }
 
     public static void setSdSourcePath(Context context, String path) {
@@ -180,15 +166,6 @@ public class AppData {
 
     public static void setFirstAppStart(Context context, boolean firstAppStart) {
         getSharedPreferences(context).edit().putBoolean(context.getString(R.string.sett_key_loginCheckButton), firstAppStart).commit();
-    }
-
-    // flag whether to display the tutorial-dialog (on=true)
-    public static boolean getTutorial(Context context) {
-        return getSharedPreferences(context).getBoolean(context.getString(R.string.sett_key_tutorial), false);
-    }
-
-    public static void setTutorial(Context context, boolean showTutorial) {
-        getSharedPreferences(context).edit().putBoolean(context.getString(R.string.sett_key_loginCheckButton), showTutorial).commit();
     }
 
     public static int getCurrentPage(Context context) {
@@ -208,37 +185,10 @@ public class AppData {
         getSharedPreferences(context).edit().putBoolean(context.getString(R.string.sett_key_loginCheckButton), toggleDirection).commit();
     }
 
-    // last alarm time in milliseconds
-    public static Long getLastAlarmTime(Context context) {
-        return getSharedPreferences(context).getLong(context.getString(R.string.sett_key_lastAlarmTime), -1);
-    }
-
-    public static void setLastAlarmTime(Context context, Long time) {
-        getSharedPreferences(context).edit().putLong(context.getString(R.string.sett_key_lastAlarmTime), time).commit();
-    }
-
-    public static Long getNextAlarmTime(Context context) {
-        return getSharedPreferences(context).getLong(context.getString(R.string.sett_key_nextAlarmTime), -1);
-    }
-
-    public static void setNextAlarmTime(Context context, Long time) {
-        getSharedPreferences(context).edit().putLong(context.getString(R.string.sett_key_nextAlarmTime), time).commit();
-    }
-
     // CAN NEVER BE MODIFIED!   (holds local paths, desc at vars)
     // sd-card-dir/picframe
     public static String getExtFolderAppRoot() {
         return new SD_Card_Helper().getExteralStoragePath() + File.separator + "picframe";
-    }
-
-    // sd-card-dir/picframe/cache
-    public static String getExtFolderCachePath() {
-        return (getExtFolderAppRoot() + File.separator + "cache");
-    }
-
-    // sd-card-dir/picframe/pictures
-    public static String getExtFolderDisplayPath() {
-        return (getExtFolderAppRoot() + File.separator + "pictures");
     }
 
     public static SharedPreferences getSharedPreferences(Context context) {
