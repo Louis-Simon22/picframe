@@ -23,57 +23,39 @@ package picframe.at.picframe.activities;
 import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
-
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.ActivityResultRegistry;
-import androidx.activity.result.contract.ActivityResultContract;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-import androidx.viewpager.widget.ViewPager.PageTransformer;
-
-import android.os.PersistableBundle;
+import android.os.Looper;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager.widget.ViewPager.PageTransformer;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import picframe.at.picframe.R;
 import picframe.at.picframe.helper.GlobalPhoneFuncs;
-import picframe.at.picframe.helper.Keys;
-import picframe.at.picframe.helper.alarm.AlarmScheduler;
 import picframe.at.picframe.helper.viewpager.AccordionTransformer;
 import picframe.at.picframe.helper.viewpager.BackgroundToForegroundTransformer;
 import picframe.at.picframe.helper.viewpager.CubeOutTransformer;
@@ -88,46 +70,53 @@ import picframe.at.picframe.helper.viewpager.RotateDownTransformer;
 import picframe.at.picframe.helper.viewpager.StackTransformer;
 import picframe.at.picframe.helper.viewpager.ZoomInTransformer;
 import picframe.at.picframe.helper.viewpager.ZoomOutPageTransformer;
-import picframe.at.picframe.service.DownloadService;
 import picframe.at.picframe.settings.AppData;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static class SlideShowTimerTask extends TimerTask {
+        private final WeakReference<MainActivity> mainActivityWeakReference;
+        private final Handler mainThreadHandler;
+
+        private SlideShowTimerTask(WeakReference<MainActivity> mainActivityWeakReference) {
+            this.mainActivityWeakReference = mainActivityWeakReference;
+            this.mainThreadHandler = new Handler(Looper.getMainLooper());
+        }
+
+        @Override
+        public void run() {
+            MainActivity mainActivity = mainActivityWeakReference.get();
+            if (mainActivity == null) {
+                cancel();
+            } else {
+                mainThreadHandler.post(mainActivity::nextSlideshowPage);
+            }
+        }
+    }
+
     private final static boolean DEBUG = true;
     final static int APP_STORAGE_ACCESS_REQUEST_CODE = 501;
     private static final String TAG = MainActivity.class.getSimpleName();
-    private ResponseReceiver receiver;
-    LocalBroadcastManager broadcastManager;
 
     private ImagePagerAdapter imagePagerAdapter;
     private CustomViewPager pager;
-    private final long countdownIntervalInMilliseconds = 2 * 60 * 1000 - 50; // interval to slightly less than 2 minutes
-    private CountDownTimer countDownTimer;
+    private static final long slideshowIntervalInMilliseconds = 5 * 1000;
+    private Timer slideshowTimer;
 
     private String mOldPath;
     private boolean mOldRecursive;
     private RelativeLayout mainLayout;
     private boolean paused;
-    private long remainingDisplayTime = 0; // in seconds
 
     private static final int nbOfExamplePictures = 6;
     private static boolean showExamplePictures = false;
-
-    @SuppressWarnings("unused")
-    public static ProgressBar mProgressBar;                             //TODO still needed?
-    @SuppressWarnings({"FieldCanBeLocal", "unused"})
-    private static Animation mFadeInAnim, mFadeOutAnim;                 //TODO still needed?
 
     private ArrayList<PageTransformer> transformers;
     private List<String> mFilePaths;
     private int size;
     private int currentPage;
-    private boolean rightToLeft;
     private Handler actionbarHideHandler;
-    private ImageView mPause;
-    private AlertDialog click_on_settings_dialog;
 
-    //public static boolean mConnCheckOC, mConnCheckSMB; //TODO still needed?
     public boolean mDoubleBackToExitPressedOnce;
 
     @Override
@@ -135,18 +124,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //mProgressBar = findViewById(R.id.progressBar);
+        slideshowTimer = new Timer();
+        SlideShowTimerTask slideShowTimerTask = new SlideShowTimerTask(new WeakReference<>(this));
+        slideshowTimer.schedule(slideShowTimerTask, slideshowIntervalInMilliseconds, slideshowIntervalInMilliseconds);
+
         mainLayout = findViewById(R.id.mainLayout);
-        mPause = findViewById(R.id.pauseIcon);
-        mFadeInAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in);
-        mFadeOutAnim = AnimationUtils.loadAnimation(this, R.anim.fade_out);
-        //mConnCheckOC = false;
-        //mConnCheckSMB = false;
-        rightToLeft = true;
         paused = false;
         enableGestures();
-        //deletePreferences();
-        //createSettingsIfInexistent();
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
@@ -173,15 +157,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //getlastpage
         currentPage = AppData.getCurrentPage(getApplicationContext());
         if (pager.getAdapter().getCount() < currentPage) {
             currentPage = 1;
         }
-
-        System.out.println("STARTING PAGE  " + currentPage);
-
-        rightToLeft = AppData.getDirection(getApplicationContext());
     }
 
     @Override
@@ -202,35 +181,10 @@ public class MainActivity extends AppCompatActivity {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        tutorial();
-        // get localBroadcastManager instance to receive localBroadCasts
-        if (broadcastManager == null) {
-            broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        }
-        // register broadcast receiver for UI update from service
-        if (receiver == null) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Keys.ACTION_DOWNLOAD_FINISHED);
-            filter.addAction(Keys.ACTION_PROGRESSUPDATE);
-            filter.addCategory(Intent.CATEGORY_DEFAULT);
-            receiver = new ResponseReceiver();
-            broadcastManager.registerReceiver(receiver, filter);
-        }
-
         if (!Environment.isExternalStorageManager()) {
             Intent intent = new Intent(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + getApplicationContext().getPackageName()));
             startActivityForResult(intent, APP_STORAGE_ACCESS_REQUEST_CODE);
         }
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        if (menu == null || !menu.hasVisibleItems())
-            return super.onPrepareOptionsMenu(menu);
-
-        boolean downloadActionIsVisible = AppData.getSourceType(getApplicationContext()) == AppData.sourceTypes.OwnCloud;
-        menu.findItem(R.id.action_download).setVisible(downloadActionIsVisible);
-        return true;
     }
 
     @Override
@@ -246,14 +200,6 @@ public class MainActivity extends AppCompatActivity {
         int itemId = item.getItemId();
         if (itemId == R.id.action_settings) {
             myIntent = new Intent(this, SettingsActivity.class);
-        } else if (itemId == R.id.action_download) {
-            debug("download now clicked");
-            Intent startDownloadIntent = new Intent(getApplicationContext(), DownloadService.class);
-            startDownloadIntent.setAction(Keys.ACTION_STARTDOWNLOAD);
-            startService(startDownloadIntent);
-            return true;
-        } else if (itemId == R.id.action_about) {
-            myIntent = new Intent(this, StatusActivity.class);
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -263,19 +209,11 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onPause() {
         super.onPause();
-        cancelSlideShowCoundown();
         mOldPath = AppData.getImagePath(getApplicationContext());
         mOldRecursive = AppData.getRecursiveSearch(getApplicationContext());
 
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        // unregister receiver, because if the activity is not in focus, we want no UI updates
-        broadcastManager.unregisterReceiver(receiver);
-        receiver = null;
-        if (click_on_settings_dialog != null) {
-            click_on_settings_dialog.cancel();
-            click_on_settings_dialog.dismiss();
-        }
         currentPage = pager.getCurrentItem();
     }
 
@@ -303,28 +241,13 @@ public class MainActivity extends AppCompatActivity {
             actionbarHideHandler = null;
         }
         actionbarHideHandler = new Handler();
-        actionbarHideHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getSupportActionBar().hide();
-            }
-        }, 2500);
+        actionbarHideHandler.postDelayed(() -> getSupportActionBar().hide(), 2500);
     }
 
-    private void pageSwitcher() {
+    private void nextSlideshowPage() {
         if (imagePagerAdapter.getCount() > 0 && !paused) {
             int localpage = pager.getCurrentItem();
-            // switch diretion if extremity of slideshow is reacher
-            if (localpage >= imagePagerAdapter.getCount() - 1) {
-                rightToLeft = false;
-            } else if (localpage == 0) {
-                rightToLeft = true;
-            }
-            if (rightToLeft) {
-                localpage++;
-            } else {
-                localpage--;
-            }
+            localpage++;
             pager.setCurrentItem(localpage, true);
             debug("localpage " + localpage);
         }
@@ -337,15 +260,12 @@ public class MainActivity extends AppCompatActivity {
         // maybe not right here will test
         AppData.setCurrentPage(getApplicationContext(), currentPage);
         debug("SAVING PAGE  " + currentPage);
-
-        // Save the direction of the pageviewer
-        AppData.setDirection(getApplicationContext(), rightToLeft);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        cancelSlideShowCoundown();
+        slideshowTimer.purge();
     }
 
     private class ImagePagerAdapter extends PagerAdapter {
@@ -374,10 +294,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Object instantiateItem(ViewGroup container, final int position) {
-            inflater = (LayoutInflater) activity
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View viewLayout = inflater.inflate(R.layout.fullscreen_layout, container,
-                    false);
+            inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View viewLayout = inflater.inflate(R.layout.fullscreen_layout, container, false);
 
             imgDisplay = (ImageView) viewLayout.findViewById(R.id.photocontainer);
 
@@ -410,21 +328,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onTap() {
                     if (AppData.getSlideshow(getApplicationContext())) {
-                        paused = !paused;
-
-                        if (paused) {
-                            cancelSlideShowCoundown();
-//                            pager.setPagingEnabled(true);
-                            if (mPause != null) {
-                                mPause.setVisibility(View.VISIBLE);
-                            }
-                            showActionBar();
-                        } else {
-                            startSlideshowCountDown();
-                            if (mPause != null) {
-                                mPause.setVisibility(View.INVISIBLE);
-                            }
-                        }
+                        showActionBar();
                     }
                 }
             });
@@ -483,10 +387,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setUpSlideShow();
-
-        if (AppData.getSlideshow(getApplicationContext()) && !paused) {
-            startSlideshowCountDown();
-        }
     }
 
     public void updateFileList() {
@@ -506,13 +406,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadAdapter() {
         imagePagerAdapter = new ImagePagerAdapter(MainActivity.this);
-//        pager.setPagingEnabled(true);
-//        setUp = new DisplayImages(MainActivity.this);
         try {
             pager.setAdapter(imagePagerAdapter);
             currentPage = imagePagerAdapter.getPage();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("Image adapter error", Log.getStackTraceString(e));
         }
     }
 
@@ -532,48 +430,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private boolean checkForProblemsAndShowToasts() {
-        // OwnCloud or Dropbox selected
-        if (!AppData.sourceTypes.ExternalSD.equals(AppData.getSourceType(getApplicationContext()))) {
-            // if no write rights, we don't need to download
-            if (!GlobalPhoneFuncs.isExternalStorageWritable()) {
-                Toast.makeText(this, R.string.main_toast_noSDWriteRights, Toast.LENGTH_SHORT).show();
-            } else {
-                // If no Username set although source is not SD Card
-                if ("".equals(AppData.getUserName(getApplicationContext())) || "".equals(AppData.getUserPassword(getApplicationContext()))) {
-                    Toast.makeText(this, R.string.main_toast_noUsernameSet, Toast.LENGTH_SHORT).show();
-                } else {
-                    debug("username and pw set");
-                    // Try to connect & login to selected source server
-                    if (AppData.sourceTypes.OwnCloud.equals(AppData.getSourceType(getApplicationContext()))) {
-                        debug("trying OC check");
-                        //startConnectionCheck();
-                        Intent startDownloadIntent = new Intent(getApplicationContext(), DownloadService.class);
-                        startDownloadIntent.setAction(Keys.ACTION_STARTDOWNLOAD);
-                        startService(startDownloadIntent);
-                        return true;
-                    }// else if (AppData.getSlideshow(getApplicationContext()).equals(AppData.sourceTypes.Dropbox))
-                    {
-                        // TODO: Dropbox checks go here
-                    }
-                }
-            }
-            // SD Card selected
-        } else {
-            if (!GlobalPhoneFuncs.isExternalStorageReadable()) {
-                // If no read rights for SD although source is SD Card
-                Toast.makeText(this, R.string.main_toast_noSDReadRights, Toast.LENGTH_SHORT).show();
-            } else {
-                if (!GlobalPhoneFuncs.hasAllowedFiles(getApplicationContext())) {
-                    Toast.makeText(this, R.string.main_toast_noFileFound, Toast.LENGTH_SHORT).show();
-                } else {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     public void selectTransformer() {
         if (AppData.getSlideshow(getApplicationContext()) && AppData.getTransitionStyle(getApplicationContext()) == 11) {
             pager.setPageTransformer(true, transformers.get(random()));
@@ -590,14 +446,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setSize() {
-        if (!showExamplePictures)
-            size = mFilePaths.size();
-        else
-            size = nbOfExamplePictures;
-    }
-
-    private Intent getSettingsActivityIntent() {
-        return new Intent(this, SettingsActivity.class);
+        if (!showExamplePictures) size = mFilePaths.size();
+        else size = nbOfExamplePictures;
     }
 
     private void initializeTransitions() {
@@ -615,144 +465,6 @@ public class MainActivity extends AppCompatActivity {
         this.transformers.add(new ZoomOutPageTransformer());
     }
 
-    private void tutorial() {
-        if (!AppData.getTutorial(getApplicationContext())) {
-            return;
-        }
-        AlertDialog.Builder click_on_settings_dialog_builder = new AlertDialog.Builder(MainActivity.this);
-        click_on_settings_dialog_builder
-                .setMessage(R.string.main_dialog_tutorial_text)
-                .setPositiveButton(R.string.main_dialog_tutorial_okButton,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                            }
-                        })
-                .setNeutralButton(R.string.main_dialog_tutorial_dontShowAgainButton,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                AppData.setTutorial(getApplicationContext(), false);
-                            }
-                        })
-                .setNegativeButton(R.string.main_dialog_tutorial_openSettingsNowButton,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                                startActivity(getSettingsActivityIntent());
-                            }
-                        });
-        click_on_settings_dialog = click_on_settings_dialog_builder.create();
-        click_on_settings_dialog.getWindow().setGravity(Gravity.TOP | Gravity.START);
-        click_on_settings_dialog.setCancelable(true);
-        click_on_settings_dialog.show();
-        showActionBar();
-    }
-
-
-    public class ResponseReceiver extends BroadcastReceiver {
-        private int progressBroadCastsReceived = 0;
-        public static final String BOOTED_MSG = "booted";
-        private float percent;
-        private boolean indeterminate;
-
-        // to prevent instantiation
-        private ResponseReceiver() {
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            debug("In onReceive!");
-            if (intent != null) {
-                // received an intent to update the viewpager
-                if (Keys.ACTION_DOWNLOAD_FINISHED.equals(intent.getAction())) {
-                    debug("received 'download_finished' action via broadcast");
-                    progressBroadCastsReceived = 0;
-                    new Handler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateFileList();
-                        }
-                    });
-                } else if (Keys.ACTION_PROGRESSUPDATE.equals(intent.getAction())) {
-                    progressBroadCastsReceived++;
-                    int progressPercent = intent.getIntExtra(Keys.MSG_PROGRESSUPDATE_PERCENT, 0);
-                    Boolean indeterminate = intent.getBooleanExtra(Keys.MSG_PROGRESSUPDATE_INDITERMINATE, true);
-                    debug("received 'progress_update' - " +
-                            progressPercent + "% - indeterminate?" + indeterminate);
-                    if (progressBroadCastsReceived > 2) {
-                        new Handler().post(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateFileList();
-                            }
-                        });
-                        progressBroadCastsReceived = 0;
-                    }
-
-                }
-            }
-        }
-    }
-
-    private void startSlideshowCountDown() {
-        debug("startSlideshowCountDown");
-        if (remainingDisplayTime != 0 && remainingDisplayTime < AppData.getDisplayTime(getApplicationContext())) {
-            debug("remainingDisplayTime: " + remainingDisplayTime + " < " + AppData.getDisplayTime(getApplicationContext()) + ", displayTime");
-            countDownTimer = new CountDownTimer((AppData.getDisplayTime(getApplicationContext()) - remainingDisplayTime) * 1000, countdownIntervalInMilliseconds) {
-                @Override
-                public void onTick(long l) {
-                    debug("unique tick!" + l / 1000);
-                    remainingDisplayTime = l;
-                }
-
-                @Override
-                public void onFinish() {
-                    debug("done with this timer!");
-                    pageSwitcher();
-                    startRepeatingCountDowns();
-                }
-            }.start();
-        } else {
-            debug("no leftover displaytime!");
-            startRepeatingCountDowns();
-        }
-
-    }
-
-    private void startRepeatingCountDowns() {
-        debug("startRepeatingCountDowns");
-        countDownTimer = new CountDownTimer(AppData.getDisplayTime(getApplicationContext()) * 1000, countdownIntervalInMilliseconds) {
-            @Override
-            public void onTick(long l) {
-                remainingDisplayTime = l / 1000;
-                debug("tick!" + remainingDisplayTime);
-            }
-
-            @Override
-            public void onFinish() {
-                pageSwitcher();
-                countDownTimer.start();
-            }
-        }.start();
-    }
-
-    private void cancelSlideShowCoundown() {
-        /* remainingg display time is always imprecise, the real value located somewhere between
-            0 and countdownIntervalInMilliseconds.
-            If the display time is smaller than countdownIntervalInMilliseconds/1000,
-            then the value of countdownIntervalInMilliseconds will never change, and resetting
-            the value will be more accurate.
-         */
-        if (AppData.getDisplayTime(getApplicationContext()) < countdownIntervalInMilliseconds / 1000) {
-            debug(AppData.getDisplayTime(getApplicationContext()) + " < " + countdownIntervalInMilliseconds / 1000);
-            remainingDisplayTime = 0;
-        }
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
-    }
 
     private void debug(String msg) {
         if (DEBUG) {
@@ -760,3 +472,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+

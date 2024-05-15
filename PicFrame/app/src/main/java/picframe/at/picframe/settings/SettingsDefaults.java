@@ -27,7 +27,6 @@ public class SettingsDefaults {
 //        defValues.put(R.string.sett_key_srcpath_dropbox, "https://");
         defValues.put(R.string.sett_key_recursiveSearch, tBool);
         defValues.put(R.string.sett_key_transition, "10");
-        defValues.put(R.string.sett_key_downloadInterval, "12");
         defValues.put(R.string.sett_key_tutorial, true);
     }
     /*  <string name="sett_key_firstStart" translatable="false">FirstStart</string>     */

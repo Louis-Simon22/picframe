@@ -9,11 +9,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.GregorianCalendar;
-
 import picframe.at.picframe.R;
 import picframe.at.picframe.helper.GlobalPhoneFuncs;
-import picframe.at.picframe.helper.alarm.TimeConverter;
 import picframe.at.picframe.settings.AppData;
 
 public class StatusActivity extends AppCompatActivity {

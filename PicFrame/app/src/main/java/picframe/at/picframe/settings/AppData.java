@@ -133,14 +133,6 @@ public class AppData {
         }
     }
 
-    // holds the time-interval to initiate the next download of images in hours
-    public static int getUpdateIntervalInHours(Context context) {
-        return Integer.parseInt(
-                getSharedPreferences(context).getString(context.getString(R.string.sett_key_downloadInterval),
-                        (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_downloadInterval)));
-    }
-
-
     // flag whether to include images in subfolders (on=true)
     public static boolean getRecursiveSearch(Context context) {
         return getSharedPreferences(context).getBoolean(context.getString(R.string.sett_key_recursiveSearch),
