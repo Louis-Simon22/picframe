@@ -74,6 +74,9 @@ import picframe.at.picframe.helper.viewpager.ZoomInTransformer;
 import picframe.at.picframe.helper.viewpager.ZoomOutPageTransformer;
 import picframe.at.picframe.settings.AppData;
 
+// TODO reset the slideshow when settings change
+// TODO transitions are offset by one
+// TODO the first transition should be the normal slideshow
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static class SlideShowTimerTask extends TimerTask {
@@ -123,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // TODO reset the slideshow when settings change
         setContentView(R.layout.activity_main);
 
         mainLayout = findViewById(R.id.mainLayout);
