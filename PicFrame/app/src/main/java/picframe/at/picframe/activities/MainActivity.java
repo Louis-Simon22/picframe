@@ -25,12 +25,13 @@ import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMI
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,6 +43,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.PagerAdapter;
@@ -72,7 +74,7 @@ import picframe.at.picframe.helper.viewpager.ZoomInTransformer;
 import picframe.at.picframe.helper.viewpager.ZoomOutPageTransformer;
 import picframe.at.picframe.settings.AppData;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static class SlideShowTimerTask extends TimerTask {
         private final WeakReference<MainActivity> mainActivityWeakReference;
@@ -94,13 +96,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public final static int APP_STORAGE_ACCESS_REQUEST_CODE = 501;
     private final static boolean DEBUG = true;
-    final static int APP_STORAGE_ACCESS_REQUEST_CODE = 501;
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    private static final int nbOfExamplePictures = 6;
+    private static final int ACTION_BAR_SHOW_DURATION = 5000;
+    private static boolean showExamplePictures = false;
 
     private ImagePagerAdapter imagePagerAdapter;
     private CustomViewPager pager;
-    private static final long slideshowIntervalInMilliseconds = 5 * 1000;
     private Timer slideshowTimer;
 
     private String mOldPath;
@@ -108,25 +113,18 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout mainLayout;
     private boolean paused;
 
-    private static final int nbOfExamplePictures = 6;
-    private static boolean showExamplePictures = false;
-
     private ArrayList<PageTransformer> transformers;
     private List<String> mFilePaths;
     private int size;
     private int currentPage;
     private Handler actionbarHideHandler;
-
     public boolean mDoubleBackToExitPressedOnce;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // TODO reset the slideshow when settings change
         setContentView(R.layout.activity_main);
-
-        slideshowTimer = new Timer();
-        SlideShowTimerTask slideShowTimerTask = new SlideShowTimerTask(new WeakReference<>(this));
-        slideshowTimer.schedule(slideShowTimerTask, slideshowIntervalInMilliseconds, slideshowIntervalInMilliseconds);
 
         mainLayout = findViewById(R.id.mainLayout);
         paused = false;
@@ -161,6 +159,22 @@ public class MainActivity extends AppCompatActivity {
         if (pager.getAdapter().getCount() < currentPage) {
             currentPage = 1;
         }
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+    }
+
+    private void setupTimer() {
+        if (slideshowTimer == null) {
+            slideshowTimer = new Timer();
+        }
+        SlideShowTimerTask slideShowTimerTask = new SlideShowTimerTask(new WeakReference<>(this));
+        int displayTimeInMillis = AppData.getDisplayTime(this) * 1000;
+        debug("Display time: " + displayTimeInMillis);
+        slideshowTimer.schedule(slideShowTimerTask, displayTimeInMillis, displayTimeInMillis);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, @Nullable String key) {
+
     }
 
     @Override
@@ -172,6 +186,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        setupTimer();
 
         // refresh toolbar options (hide/show downloadNow)
         supportInvalidateOptionsMenu();
@@ -209,6 +225,10 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onPause() {
         super.onPause();
+
+        slideshowTimer.cancel();
+        slideshowTimer = null;
+
         mOldPath = AppData.getImagePath(getApplicationContext());
         mOldRecursive = AppData.getRecursiveSearch(getApplicationContext());
 
@@ -223,12 +243,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             this.mDoubleBackToExitPressedOnce = true;
             Toast.makeText(this, R.string.main_toast_exitmsg, Toast.LENGTH_SHORT).show();
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mDoubleBackToExitPressedOnce = false;
-                }
-            }, 2000);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> mDoubleBackToExitPressedOnce = false, 2000);
         }
     }
 
@@ -240,14 +255,18 @@ public class MainActivity extends AppCompatActivity {
             actionbarHideHandler.removeCallbacksAndMessages(null);
             actionbarHideHandler = null;
         }
-        actionbarHideHandler = new Handler();
-        actionbarHideHandler.postDelayed(() -> getSupportActionBar().hide(), 2500);
+        actionbarHideHandler = new Handler(Looper.getMainLooper());
+        actionbarHideHandler.postDelayed(() -> getSupportActionBar().hide(), ACTION_BAR_SHOW_DURATION);
     }
 
     private void nextSlideshowPage() {
         if (imagePagerAdapter.getCount() > 0 && !paused) {
             int localpage = pager.getCurrentItem();
             localpage++;
+            // We loop when reaching the end
+            if (localpage == imagePagerAdapter.getCount()) {
+                localpage = 0;
+            }
             pager.setCurrentItem(localpage, true);
             debug("localpage " + localpage);
         }
@@ -269,15 +288,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class ImagePagerAdapter extends PagerAdapter {
-        //        private List<String> mFilePaths;
-        private Activity activity;
-        private LayoutInflater inflater;
-        private ImageView imgDisplay;
+        private final LayoutInflater inflater;
         private int localpage;
-//        private int size;
 
         public ImagePagerAdapter(Activity activity) {
-            this.activity = activity;
+            this.inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             updateSettings();
         }
 
@@ -291,13 +306,12 @@ public class MainActivity extends AppCompatActivity {
             return view == object;
         }
 
-
+        @NonNull
         @Override
-        public Object instantiateItem(ViewGroup container, final int position) {
-            inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        public Object instantiateItem(@NonNull ViewGroup container, final int position) {
             View viewLayout = inflater.inflate(R.layout.fullscreen_layout, container, false);
 
-            imgDisplay = (ImageView) viewLayout.findViewById(R.id.photocontainer);
+            ImageView imgDisplay = viewLayout.findViewById(R.id.photocontainer);
 
             if (AppData.getScaling(getApplicationContext())) {
                 imgDisplay.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -327,9 +341,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onTap() {
-                    if (AppData.getSlideshow(getApplicationContext())) {
-                        showActionBar();
-                    }
+                    showActionBar();
                 }
             });
             container.addView(viewLayout);
@@ -343,7 +355,6 @@ public class MainActivity extends AppCompatActivity {
 
         private void updateSettings() {
             mFilePaths = GlobalPhoneFuncs.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
-            //setUp.notifyDataSetChanged();
             setSize();
         }
 
@@ -357,19 +368,11 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == APP_STORAGE_ACCESS_REQUEST_CODE && Environment.isExternalStorageManager()) {
             startSlideshow();
-        } else {
-            // TODO show toast saying we can't do anything
         }
     }
 
     private void setUpSlideShow() {
-        if (AppData.getSlideshow(getApplicationContext())) {
-            pager.setScrollDurationFactor(8);
-//            pager.setPagingEnabled(false);
-        } else {
-            pager.setScrollDurationFactor(3);
-//            pager.setPagingEnabled(true);
-        }
+        pager.setScrollDurationFactor(8);
     }
 
     private void startSlideshow() {
@@ -431,12 +434,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void selectTransformer() {
-        if (AppData.getSlideshow(getApplicationContext()) && AppData.getTransitionStyle(getApplicationContext()) == 11) {
+        if (AppData.getTransitionStyle(getApplicationContext()) == 11) {
             pager.setPageTransformer(true, transformers.get(random()));
-        } else if (AppData.getSlideshow(getApplicationContext())) {
-            pager.setPageTransformer(true, transformers.get(AppData.getTransitionStyle(getApplicationContext())));
         } else {
-            pager.setPageTransformer(true, new ZoomOutPageTransformer());
+            pager.setPageTransformer(true, transformers.get(AppData.getTransitionStyle(getApplicationContext())));
         }
     }
 
@@ -446,8 +447,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setSize() {
-        if (!showExamplePictures) size = mFilePaths.size();
-        else size = nbOfExamplePictures;
+        if (!showExamplePictures) {
+            size = mFilePaths.size();
+        }
+        else {
+            size = nbOfExamplePictures;
+        }
     }
 
     private void initializeTransitions() {

@@ -20,12 +20,6 @@
         <item name="86400">1 Tag</item>
     </string-array>
 
-    <string-array name="srcTypeEntries">
-        <item name="0">SD-Karte</item>
-        <item name="1">OwnCloud</item>
-        <!--item name="2">Dropbox</item-->
-    </string-array>
-
     <string-array name="downloadIntervalEntries">
         <item name="-1">Nie</item>
         <item name="1">1 Stunde</item>
@@ -37,20 +31,21 @@
         <item name="72">3 Tage</item>
         <item name="168">1 Woche</item>
     </string-array>
-    <string-array name="transitionTypeEntries">
-        <item name="0">Akkordion</item>
-        <item name="1">Vom Hintergrund nach vorne</item>
-        <item name="2">Würfel</item>
-        <item name="3">In den Hintergrund verblassen</item>
-        <item name="4">Überblenden</item>
-        <item name="5">Vertikal drehen</item>
-        <item name="6">Vom Vordergrung nach hinten</item>
-        <item name="7">Hineindrehen</item>
-        <item name="8">Stapel</item>
-        <item name="9">Hineinzoomen</item>
-        <item name="10">Herauszoomen</item>
-        <item name="11">Zufällig</item>
-    </string-array>
 
+    <string-array name="transitionTypeEntries">
+        <item name="0">Bildershow</item>
+        <item name="1">Akkordion</item>
+        <item name="2">Vom Hintergrund nach vorne</item>
+        <item name="3">Würfel</item>
+        <item name="4">In den Hintergrund verblassen</item>
+        <item name="5">Überblenden</item>
+        <item name="6">Vertikal drehen</item>
+        <item name="7">Vom Vordergrung nach hinten</item>
+        <item name="8">Hineindrehen</item>
+        <item name="9">Stapel</item>
+        <item name="10">Hineinzoomen</item>
+        <item name="11">Herauszoomen</item>
+        <item name="12">Zufällig</item>
+    </string-array>
 
 </resources>

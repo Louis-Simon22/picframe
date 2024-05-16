@@ -2,7 +2,6 @@ package picframe.at.picframe.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -45,7 +44,7 @@ public class StatusActivity extends AppCompatActivity {
     private void setLocalFolderAndFileCount() {
         String localFolder = AppData.getImagePath(getApplicationContext());
         String localFileCount;
-        if (localFolder.equals("")) {
+        if (localFolder.isEmpty()) {
             localFolder = "No path set";
             localFileCount = "-";
         } else {

@@ -1,140 +1,55 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- SERVICE/NOTIFICATION STRINGS -->
-    <string name="service_notif_startDownloadTicker">download started</string>
-    <string name="service_notif_startDownloadText">Checking for new files to download.</string>
-    <string name="service_notif_actionStop">Stop download</string>
-    <string name="service_notif_progressText">Download Status:</string>
-    <string name="service_notif_failureTicker">download failed</string>
-    <string name="service_notif_failureText">Download failed.</string>
-    <string name="service_notif_failureLogin">Connection/Login failed, please check your Settings.</string>
-    <string name="service_notif_failureNotEnoughStorage">Not enough storage available on external SD card.</string>
-    <string name="service_notif_failureNoWifi">Can\'t connect to WIFI. No files will be downloaded.</string>
-    <string name="service_notif_failureFolderInitFailure">Couldn\'t create download folder.</string>
-    <string name="service_notif_finishedTicker">download finished</string>
-    <string name="service_notif_finishedText">Download finished:</string>
-    <string name="service_notif_finishedTextFiles">files downloaded</string>
-    <string name="service_notif_finishedNoNewFiles">No new files found.</string>
-    <string name="service_notif_interruptTicker">download interrupted</string>
-    <string name="service_notif_interruptText">Download got interrupted.</string>
-    <string name="service_notif_stoppedTicker">download stopped</string>
-    <string name="service_notif_stoppedText">Download stopped.</string>
-    <string name="service_notif_stoppedSubText">Tap to open PicFrame.</string>
-    <!-- SERVICE/NOTIFICATION STRINGS END -->
-
     <!-- MAIN STRINGS -->
     <string name="app_name" translatable="false">PicFrame</string>
     <string name="app_version" translatable="false">1.5.2</string>
     <string name="action_downloadNow">Download now</string>
-    <string name="main_toast_noUsernameSet">No Username or Password set for network resource.</string>
     <string name="main_toast_noSDReadRights">Can\'t read from external SD card.</string>
     <string name="main_toast_noSDWriteRights">Can\'t write to external SD card.</string>
     <string name="main_toast_noFileFound">No image files were found in given directory.</string>
-    <string name="main_toast_noNewFiles">No new files found on server.</string>
-    <string name="main_toast_loginFailedSMB">Couldn\'t connect/login to samba server.\nPlease check your samba settings again.</string>
-    <string name="main_toast_download_interrupted">Press back again to stop the download and leave.</string>
     <string name="main_toast_exitmsg">Press back again to leave.</string>
     <string name="main_toast_noFolderPathSet">You have not set a picture source folder yet!</string>
-    <string name="main_dialog_tutorial_text">To access the settings, please tap or swipe down, and click on the settings icon.</string>
-    <string name="main_dialog_tutorial_openSettingsNowButton">Settings</string>
-    <string name="main_dialog_tutorial_dontShowAgainButton">Don\'t show again</string>
-    <string name="main_dialog_tutorial_okButton">OK</string>
     <!-- MAIN STRINGS END -->
-
-    <!-- OC-Tasks -->
-    <string name="octask_toast_loginFailed">Couldn\'t connect/login to owncloud server.\nPlease check your owncloud settings again. </string>
-    <!-- OC-Tasks END -->
 
     <!-- SETTINGS STRINGS -->
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
     <string name="sett_displayTime">Display Time</string>
     <string name="sett_displayTimeSumm">Display time for each picture</string>
-    <string name="sett_slideShow">Slideshow</string>
     <string name="sett_randomize">Random image</string>
     <string name="sett_randomizeSumm">Whether the pictures should be randomized or in filename order</string>
     <string name="sett_randomizeSummOff">Pictures won\'t be randomized (Filename order)</string>
     <string name="sett_randomizeSummOn">Pictures will be randomized</string>
-    <string name="sett_slideShowSumm">Whether pictures change after given time</string>
-    <string name="sett_slideShowSummOff">Pictures won\'t change automatically</string>
-    <string name="sett_slideShowSummOn">Pictures will change automatically after given time</string>
     <string name="sett_scaling">Picture Scaling</string>
-    <string name="sett_scalingSumm">Whether pictures will be shown fullscreen</string>
-    <string name="sett_scalingSummOff">Pictures will be shown in entirely</string>
+    <string name="sett_scalingSumm">Whether pictures will be scaled to fit the display</string>
+    <string name="sett_scalingSummOff">Pictures will be shown in their normal aspect ratio</string>
     <string name="sett_scalingSummOn">Pictures will be scaled to fit the display</string>
-    <string name="sett_cat1">Picture Settings</string>
-    <string name="sett_cat2">Source Settings</string>
-    <string name="sett_srcType">Picture Source</string>
-    <string name="sett_srcTypeSumm">Select the source of your pictures</string>
+    <string name="settings_category_source">Source Settings</string>
+    <string name="settings_category_slideshow">Slideshow Settings</string>
     <string name="sett_recursiveSearch">Include sub-directories</string>
     <string name="sett_recursiveSearchSumm">Whether pictures from sub-directories should be included</string>
     <string name="sett_recursiveSearchSummOff">Pictures from sub-directories will not be included</string>
     <string name="sett_recursiveSearchSummOn">Pictures from sub-directories will be included</string>
     <string name="sett_transition">Transition</string>
     <string name="sett_transitionSumm">Choose desired transition for the slideshow</string>
-    <string name="sett_deleteData">Delete data</string>
-    <string name="sett_deleteDataSumm">Delete all downloaded images stored in the picframe folder</string>
     <string name="sett_loginCheck_success">Success</string>
     <string name="sett_loginCheck_failure">Failure</string>
-    <string name="sett_resetTitle">Restore default settings</string>
-    <string name="sett_resetSummary">Reset settings to default</string>
-    <string name="sett_confirmationDialogMessage">Do you really want to delete your settings information and reset everything to default?</string>
         <!-- Settings-Details Strings -->
-    <string name="sett_srcPath_externalSD">Directory</string>
-    <string name="sett_srcPath_externalSDSumm">Browse path to pictures</string>
-    <string name="sett_username">Username</string>
-    <string name="sett_usernameSumm">Username for the selected source</string>
-    <string name="sett_password">Password</string>
-    <string name="sett_passwordSumm">Password for the selected source</string>
-    <string name="sett_srcPath_OwnCloud">OwnCloud URL</string>
-    <string name="sett_srcPath_OwnCloudSumm">Set the URL for your OwnCloud Server</string>
-    <string name="sett_downloadInterval">Download Interval</string>
-    <string name="sett_downloadIntervalSumm">Choose an interval, after which the images are fetched from the source again</string>
-    <string name="sett_loginCheck">Login-Check</string>
-    <string name="sett_loginCheckSumm">Click here, to test the login</string>
-        <!-- Settings Toast Strings -->
-    <string name="sett_toast_delFiles">Deleting images!</string>
-    <string name="sett_toast_wrongUrl">Forbidden character at end of URL: \'/\'. Not saving.</string>
-    <string name="sett_toast_noAlarmSet">Could not set download alarm - last login-check was not successful.</string>
-    <string name="sett_toast_loginSuccess">Login successful</string>
-    <string name="sett_toast_loginFailure">Login not successful</string>
-    <string name="sett_toast_reset">Reset settings</string>
+    <string name="sett_srcPath_externalSD">Path to pictures</string>
         <!-- Settings Dialog Strings -->
     <string name="sett_dialog_title">Select directory</string>
-    <string name="sett_dialog_posBtn" tools:ignore="ButtonCase">Ok</string>
+    <string name="sett_dialog_posBtn" tools:ignore="ButtonCase">OK</string>
     <string name="sett_dialog_negBtn">Cancel</string>
-    <string name="sett_dialog_changedURL_message">You changed your OwnCloud URL.\nDo you want to delete the old image files before downloading new ones?</string>
-    <string name="sett_deleteDataDialog_msg">Do you really want to delete all downloaded image files?</string>
-    <string name="sett_deleteDataDialog_posBtn">Yes</string>
-    <string name="sett_deleteDataDialog_negBtn">No</string>
-    <string name="sett_detailsPrefScreen_title">Settings</string>
-    <string name="sett_detailsPrefScreen_summ">Set specific settings for</string>
-    <string name="sett_yes">Yes!</string>
+    <string name="sett_yes">Yes</string>
     <string name="sett_no">No</string>
-    <string name="sett_dialog_notConnected_message">The Last Login-Check was not successful; the download will not work.\nAre you sure you want to leave the ownCloud settings?</string>
 
-        <!-- KEYS -->
-    <string name="sett_key_cat1" translatable="false">sett_cat1</string>
-    <string name="sett_key_cat2" translatable="false">sett_cat2</string>
-    <string name="sett_key_prefScreenDetails" translatable="false">sett_prefScreenDetails</string>
-            <!-- SAVE KEYS -->
-    <string name="sett_key_username" translatable="false">Username</string>
-    <string name="sett_key_password" translatable="false">Password</string>
-    <string name="sett_key_slideshow" translatable="false">Slideshow</string>
     <string name="sett_key_scaling" translatable="false">Scaling</string>
     <string name="sett_key_randomize" translatable="false">Randomize</string>
     <string name="sett_key_displaytime" translatable="false">DisplayTime</string>
-    <string name="sett_key_srctype" translatable="false">SrcType</string>
-    <string name="sett_key_srcpath_sd" translatable="false">SrcPath_sd</string>
-    <string name="sett_key_srcpath_owncloud" translatable="false">SrcPath_owncloud</string>
-    <string name="sett_key_srcpath_dropbox" translatable="false">SrcPath_dropbox</string>
-    <string name="sett_key_recursiveSearch" translatable="false">RecursiveSearch</string>
-    <string name="sett_key_deleteData" translatable="false">DeleteData</string>
     <string name="sett_key_transition" translatable="false">Transition</string>
+    <string name="sett_key_srcpath_sd" translatable="false">SrcPath_sd</string>
+    <string name="sett_key_recursiveSearch" translatable="false">RecursiveSearch</string>
     <string name="sett_key_firstStart" translatable="false">FirstStart</string>
-    <string name="sett_key_tutorial" translatable="false">Tutorial</string>
-    <string name="sett_key_restoreDefaults" translatable="false">restoreDefaults</string>
-    <string name="sett_key_loginCheckButton" translatable="false">loginCheckButton</string>
     <!-- SETTINGS STRINGS END -->
 
     <!-- ABOUT STRINGS -->
@@ -846,13 +761,7 @@
     <!-- STATUS STRINGS -->
     <string name="status" translatable="false">Status</string>
     <string name="status_nbFiles">Files in current display folder</string>
-    <string name="ownCloud">ownCloud Status</string>
     <string name="status_local">Status</string>
-    <string name="status_ownCloud">Status - ownCloud</string>
-    <string name="statusOC_nbRemoteFiles">Files on ownCloud server</string>
-    <string name="statusOC_nextAlarm">Next download</string>
-    <string name="statusOC_noAlarm">No download scheduled</string>
-    <string name="statusOC_loginCheck">Connection status</string>
     <string name="status_currentFolder">Current display folder</string>
     <string name="status_buttonAbout">Developed by, Photo credit, Licenses</string>
     <string name="title_activity_status">Status</string>
@@ -860,7 +769,6 @@
     <string name="sett_key_direction" translatable="false">toogledirection</string>
     <string name="sett_key_lastAlarmTime" translatable="false">alarmtime</string>
     <string name="sett_key_nextAlarmTime" translatable="false">nextalarmtime</string>
-    <string name="status_downloadIntervalNoDownload">No download scheduled</string>
     <!-- STATUS STRINGS END -->
 
 

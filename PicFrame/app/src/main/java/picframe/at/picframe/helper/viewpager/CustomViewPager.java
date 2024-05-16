@@ -1,7 +1,9 @@
 package picframe.at.picframe.helper.viewpager;
 
 import android.content.Context;
+
 import androidx.viewpager.widget.ViewPager;
+
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.animation.Interpolator;
@@ -45,11 +47,6 @@ public class CustomViewPager extends ViewPager {
         return false;
     }
 
-    public void setPagingEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-
     private CustomScroller mScroller = null;
 
     /**
@@ -57,7 +54,6 @@ public class CustomViewPager extends ViewPager {
      * duration
      */
     private void postInitViewPager() {
-
         try {
             Field scroller = ViewPager.class.getDeclaredField("mScroller");
             scroller.setAccessible(true);
@@ -77,13 +73,4 @@ public class CustomViewPager extends ViewPager {
     public void setScrollDurationFactor(double scrollFactor) {
         mScroller.setScrollDurationFactor(scrollFactor);
     }
-
 }
-
-
-
-/*    public ViewPagerCustomDuration(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        postInitViewPager();
-    }
-*/

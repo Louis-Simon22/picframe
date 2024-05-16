@@ -22,10 +22,7 @@ package picframe.at.picframe.settings;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.io.File;
-
 import picframe.at.picframe.R;
-import picframe.at.picframe.helper.local_storage.SD_Card_Helper;
 
 /**
  * Stores App Settings, to get and load easily
@@ -36,35 +33,6 @@ public class AppData {
 
     public static void resetSettings(Context context) {
         SettingsDefaults.resetSettings(context);
-    }
-
-    // enums for available source types (like images from SD-Card, OwnCloud or Dropbox)
-    public enum sourceTypes {
-        ExternalSD, OwnCloud, Dropbox;
-        private static final sourceTypes[] allValues = values();
-
-        public static sourceTypes getSourceTypesForInt(int num) {
-            try {
-                return allValues[num];
-            } catch (ArrayIndexOutOfBoundsException e) {
-                return ExternalSD;
-            }
-        }
-    }
-
-    /* TODO
-    extFolderAppRoot = new SD_Card_Helper().getExteralStoragePath() +
-                File.separator + "picframe";
-        extFolderDisplayPath = extFolderAppRoot + File.separator + "pictures";
-        extFolderCachePath = extFolderAppRoot + File.separator + "cache";
-    *
-    * */
-
-    // ONLY TO BE MODIFIED BY SETTINGS ACTIVITY
-    // flag whether slideshow is selected(on=true) or not(off=false)
-    public static boolean getSlideshow(Context context) {
-        return getSharedPreferences(context).getBoolean(context.getString(R.string.sett_key_slideshow),
-                (Boolean) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_slideshow));
     }
 
     // holds the time to display each picture in seconds
@@ -92,45 +60,11 @@ public class AppData {
                 (Boolean) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_scaling));
     }
 
-    // holds the type of the selected source as int
-    public static int getSrcTypeInt(Context context) {
-        return Integer.parseInt(
-                getSharedPreferences(context).getString(context.getString(R.string.sett_key_srctype),
-                        (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_srctype)));
-    }
-
-    // holds the type of the selected source
-    public static sourceTypes getSourceType(Context context) {
-        return sourceTypes.getSourceTypesForInt(Integer.parseInt(
-                getSharedPreferences(context).getString(context.getString(R.string.sett_key_srctype),
-                        (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_srctype))));
-    }
-
-    // holds the username to log into the owncloud account
-    public static String getUserName(Context context) {
-        return getSharedPreferences(context).getString(context.getString(R.string.sett_key_username),
-                (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_username));
-    }
-
-    // holds the password to log into the owncloud account
-    public static String getUserPassword(Context context) {
-        return getSharedPreferences(context).getString(context.getString(R.string.sett_key_password),
-                (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_password));
-    }
-
     // Returns selected SD-Card directory, or URL to owncloud or samba server
     // holds the path to the image source (from where to (down)-load them
     public static String getSourcePath(Context context) {
-        sourceTypes tmpType = getSourceType(context);
-        if (sourceTypes.OwnCloud.equals(tmpType)) {
-            return getSharedPreferences(context).getString(context.getString(R.string.sett_key_srcpath_dropbox),
-                    (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_srcpath_dropbox));
-        } else if (sourceTypes.Dropbox.equals(tmpType)) {
-            return getSharedPreferences(context).getString(context.getString(R.string.sett_key_srcpath_dropbox), "");
-        } else {    // if SD or undefined, get SD path
-            return getSharedPreferences(context).getString(context.getString(R.string.sett_key_srcpath_sd),
-                    (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_srcpath_sd));
-        }
+        return getSharedPreferences(context).getString(context.getString(R.string.sett_key_srcpath_sd),
+                (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_srcpath_sd));
     }
 
     // flag whether to include images in subfolders (on=true)
@@ -142,13 +76,12 @@ public class AppData {
     // Always returns the path to the img folder of current src type
     // holds the root-path to the displayed images
     public static String getImagePath(Context context) {
-        sourceTypes tmpType = getSourceType(context);
         return getSharedPreferences(context).getString(context.getString(R.string.sett_key_srcpath_sd),
                 (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_srcpath_sd));
     }
 
     public static void setSdSourcePath(Context context, String path) {
-        getSharedPreferences(context).edit().putString(context.getString(R.string.sett_key_srcpath_sd), path).commit();
+        getSharedPreferences(context).edit().putString(context.getString(R.string.sett_key_srcpath_sd), path).apply();
     }
 
     // flag whether this is the first app start
@@ -157,7 +90,7 @@ public class AppData {
     }
 
     public static void setFirstAppStart(Context context, boolean firstAppStart) {
-        getSharedPreferences(context).edit().putBoolean(context.getString(R.string.sett_key_loginCheckButton), firstAppStart).commit();
+        getSharedPreferences(context).edit().putBoolean(context.getString(R.string.sett_key_firstStart), firstAppStart).apply();
     }
 
     public static int getCurrentPage(Context context) {
@@ -165,22 +98,7 @@ public class AppData {
     }
 
     public static void setCurrentPage(Context context, int page) {
-        getSharedPreferences(context).edit().putInt(context.getString(R.string.sett_key_currentPage), page).commit();
-    }
-
-    // flag for slideshow direction
-    public static boolean getDirection(Context context) {
-        return getSharedPreferences(context).getBoolean(context.getString(R.string.sett_key_direction), false);
-    }
-
-    public static void setDirection(Context context, boolean toggleDirection) {
-        getSharedPreferences(context).edit().putBoolean(context.getString(R.string.sett_key_loginCheckButton), toggleDirection).commit();
-    }
-
-    // CAN NEVER BE MODIFIED!   (holds local paths, desc at vars)
-    // sd-card-dir/picframe
-    public static String getExtFolderAppRoot() {
-        return new SD_Card_Helper().getExteralStoragePath() + File.separator + "picframe";
+        getSharedPreferences(context).edit().putInt(context.getString(R.string.sett_key_currentPage), page).apply();
     }
 
     public static SharedPreferences getSharedPreferences(Context context) {

@@ -12,17 +12,8 @@ public class CustomScroller extends Scroller {
 
     private double mScrollFactor = 1;
 
-    public CustomScroller(Context context) {
-        super(context);
-    }
-
     public CustomScroller(Context context, Interpolator interpolator) {
         super(context, interpolator);
-    }
-
-    @SuppressLint("NewApi")
-    public CustomScroller(Context context, Interpolator interpolator, boolean flywheel) {
-        super(context, interpolator, flywheel);
     }
 
     /**

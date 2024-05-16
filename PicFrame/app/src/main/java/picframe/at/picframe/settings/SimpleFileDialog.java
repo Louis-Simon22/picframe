@@ -42,7 +42,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import picframe.at.picframe.R;
-import picframe.at.picframe.helper.local_storage.SD_Card_Helper;
+import picframe.at.picframe.helper.local_storage.SDCardHelper;
 
 public class SimpleFileDialog {
     private String m_sdcardDirectory = "";
@@ -64,7 +64,7 @@ public class SimpleFileDialog {
     public SimpleFileDialog(Context context, SimpleFileDialogListener SimpleFileDialogListener) {
         m_context = context;
 //        m_sdcardDirectory = Environment.getExternalStorageDirectory().getAbsolutePath();
-        m_sdcardDirectory = new SD_Card_Helper().getExteralStoragePath();
+        m_sdcardDirectory = new SDCardHelper().getExteralStoragePath();
 //        m_sdcardDirectory = "/storage";
         m_SimpleFileDialogListener = SimpleFileDialogListener;
 

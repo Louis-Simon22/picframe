@@ -53,14 +53,7 @@ public class GlobalPhoneFuncs {
 
     // returns a List with all files in given directory
     public static List<String> getFileList(Context context, String path) {
-        List<String> fileArray = new ArrayList<>();
-        if (AppData.getSourceType(context) == AppData.sourceTypes.ExternalSD) {
-            fileArray = readSdDirectory(context, path);
-        } else if (AppData.getSourceType(context) == AppData.sourceTypes.OwnCloud) {
-            fileArray = readSdDirectory(context, path);
-        } else if (AppData.getSourceType(context) == AppData.sourceTypes.Dropbox) {
-            fileArray = readSdDirectory(context, path);
-        }
+        List<String> fileArray = readSdDirectory(context, path);
         if (fileArray.isEmpty()) return fileArray;
         if (AppData.getRandomize(context)) {
             Collections.shuffle(fileArray);

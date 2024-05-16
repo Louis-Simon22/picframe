@@ -11,23 +11,14 @@ import picframe.at.picframe.R;
 public class SettingsDefaults {
 
     private static final Map<Integer, Object> defValues = new HashMap<>();
-    private static Boolean tBool = true;
-    private static Boolean fBool = false;
 
     static {
-        defValues.put(R.string.sett_key_username, "");
-        defValues.put(R.string.sett_key_password, "");
-        defValues.put(R.string.sett_key_slideshow, tBool);
-        defValues.put(R.string.sett_key_scaling, fBool);
-        defValues.put(R.string.sett_key_randomize, fBool);
+        defValues.put(R.string.sett_key_scaling, false);
+        defValues.put(R.string.sett_key_randomize, true);
         defValues.put(R.string.sett_key_displaytime, "4");
-        defValues.put(R.string.sett_key_srctype, "0");
         defValues.put(R.string.sett_key_srcpath_sd, "");
-        defValues.put(R.string.sett_key_srcpath_owncloud, "https://");
-//        defValues.put(R.string.sett_key_srcpath_dropbox, "https://");
-        defValues.put(R.string.sett_key_recursiveSearch, tBool);
+        defValues.put(R.string.sett_key_recursiveSearch, true);
         defValues.put(R.string.sett_key_transition, "10");
-        defValues.put(R.string.sett_key_tutorial, true);
     }
     /*  <string name="sett_key_firstStart" translatable="false">FirstStart</string>     */
 
@@ -39,9 +30,9 @@ public class SettingsDefaults {
         SharedPreferences.Editor prefEditor = AppData.getSharedPreferences(context).edit();
         for (Map.Entry<Integer, Object> prefSet : defValues.entrySet()) {
             if (prefSet.getValue() instanceof String) {
-                prefEditor.putString(context.getString(prefSet.getKey()), (String) prefSet.getValue()).commit();
+                prefEditor.putString(context.getString(prefSet.getKey()), (String) prefSet.getValue()).apply();
             } else if (prefSet.getValue() instanceof Boolean) {
-                prefEditor.putBoolean(context.getString(prefSet.getKey()), (Boolean) prefSet.getValue()).commit();
+                prefEditor.putBoolean(context.getString(prefSet.getKey()), (Boolean) prefSet.getValue()).apply();
             }
         }
     }
