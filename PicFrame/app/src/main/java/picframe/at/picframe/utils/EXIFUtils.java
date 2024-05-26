@@ -1,11 +1,13 @@
-package picframe.at.picframe.helper.viewpager;
+package picframe.at.picframe.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.media.ExifInterface;
-import android.view.Display;
+
+import androidx.exifinterface.media.ExifInterface;
+
+import android.util.Log;
 import android.view.WindowManager;
 
 import java.io.IOException;
@@ -13,8 +15,7 @@ import java.io.IOException;
 /**
  * Created by ClemensH on 06.04.2015.
  */
-public class EXIF_helper {
-    private ExifInterface reader = null;
+public class EXIFUtils {
 
     public static Bitmap decodeFile(String filePath, Context myContext) {
 
@@ -25,37 +26,29 @@ public class EXIF_helper {
 
         // The new size we want to scale to ( max display resolution)
         WindowManager wm = (WindowManager) myContext.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        int width = display.getWidth();
-        int height = display.getHeight();
-        int REQUIRED_SIZE = 2048;
-        REQUIRED_SIZE = width>height? width : height;
+        int width = wm.getCurrentWindowMetrics().getBounds().width();
+        int height = wm.getCurrentWindowMetrics().getBounds().height();
+        int requiredSize = Math.max(width, height);
 
         // Find the correct scale value. It should be the power of 2.
         int width_tmp = o.outWidth;
         int height_tmp = o.outHeight;
         int scale = 1;
-        while (true) {
-            if (width_tmp <= REQUIRED_SIZE && height_tmp <= REQUIRED_SIZE)
-                break;
+        while (width_tmp > requiredSize || height_tmp > requiredSize) {
             width_tmp /= 2;
             height_tmp /= 2;
             scale *= 2;
         }
-        //System.out.println("Picture width: " + width_tmp + " --- Pic height: " + height_tmp + "\nScaleFactor: " +scale);
 
         // Decode with correct scale (inSampleSize)
         o = new BitmapFactory.Options();
         o.inSampleSize = scale;
         Bitmap b1 = BitmapFactory.decodeFile(filePath, o);
         // Rotate scaled image according to EXIF Information stored in the file
-        Bitmap b = EXIF_helper.rotateBitmap(filePath, b1);
-
-        return b;
-        // image.setImageBitmap(bitmap);
+        return EXIFUtils.rotateBitmap(filePath, b1);
     }
 
-// @see http://sylvana.net/jpegcrop/exif_orientation.html
+    // @see http://sylvana.net/jpegcrop/exif_orientation.html
     public static Bitmap rotateBitmap(String src, Bitmap bitmap) {
         try {
             int orientation = getExifOrientation(src);
@@ -98,11 +91,11 @@ public class EXIF_helper {
                 bitmap.recycle();
                 return oriented;
             } catch (OutOfMemoryError e) {
-                e.printStackTrace();
+                Log.e(EXIFUtils.class.getCanonicalName(), Log.getStackTraceString(e));
                 return bitmap;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(EXIFUtils.class.getCanonicalName(), Log.getStackTraceString(e));
         }
 
         return bitmap;
@@ -110,53 +103,12 @@ public class EXIF_helper {
 
     private static int getExifOrientation(String src) throws IOException {
         int orientation = ExifInterface.ORIENTATION_NORMAL;
-
         try {
-          ExifInterface exif = new ExifInterface(src);
-          orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            ExifInterface exif = new ExifInterface(src);
+            orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        } catch (SecurityException | IllegalArgumentException e) {
+            Log.e(EXIFUtils.class.getCanonicalName(), Log.getStackTraceString(e));
         }
         return orientation;
     }
-
-    /*
-    	// Change color scale of bitmap to grayscale
-	public Bitmap ConvertToGrayscale(Bitmap sampleBitmap) {
-		final ColorMatrix gsMatrix = new ColorMatrix();
-		gsMatrix.setSaturation(0);
-		final ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(
-				gsMatrix);
-		sampleBitmap = sampleBitmap.copy(Bitmap.Config.ARGB_8888, true);
-		final Paint paint = new Paint();
-		paint.setColorFilter(colorFilter);
-		final Canvas myCanvas = new Canvas(sampleBitmap);
-		myCanvas.drawBitmap(sampleBitmap, 0, 0, paint);
-		Log.i(LOG_PROV, LOG_NAME
-				+ "Changed Bitmap to grayscale in ConvertToGrayScale");
-		return sampleBitmap;
-	}
-
-	// Change color scale of bitmap to sepia
-	public Bitmap ConvertToSepia(Bitmap sampleBitmap) {
-		final ColorMatrix sepiaMatrix = new ColorMatrix();
-		final float[] sepMat = { 0.3930000066757202f, 0.7689999938011169f,
-				0.1889999955892563f, 0, 0, 0.3490000069141388f,
-				0.6859999895095825f, 0.1679999977350235f, 0, 0,
-				0.2720000147819519f, 0.5339999794960022f, 0.1309999972581863f,
-				0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 };
-		sepiaMatrix.set(sepMat);
-		final ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(
-				sepiaMatrix);
-		sampleBitmap = sampleBitmap.copy(Bitmap.Config.ARGB_8888, true);
-		final Paint paint = new Paint();
-		paint.setColorFilter(colorFilter);
-		final Canvas myCanvas = new Canvas(sampleBitmap);
-		myCanvas.drawBitmap(sampleBitmap, 0, 0, paint);
-		Log.i(LOG_PROV, LOG_NAME + "Changed Bitmap to sepia in ConvertToSepia");
-		return sampleBitmap;
-	}
-    * */
 }

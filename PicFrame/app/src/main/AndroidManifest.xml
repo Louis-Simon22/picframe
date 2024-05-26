@@ -37,7 +37,7 @@
             android:parentActivityName=".activities.MainActivity" />
         <!-- Register the Alarm Receiver -->
         <receiver
-            android:name=".helper.alarm.AlarmReceiver"
+            android:name=".utils.alarm.AlarmReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="ACTION_UPDATE_ALARM" />

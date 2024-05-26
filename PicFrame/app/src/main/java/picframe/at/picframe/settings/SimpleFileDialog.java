@@ -42,7 +42,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import picframe.at.picframe.R;
-import picframe.at.picframe.helper.local_storage.SDCardHelper;
+import picframe.at.picframe.utils.SDCardHelper;
 
 public class SimpleFileDialog {
     private String m_sdcardDirectory = "";

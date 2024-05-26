@@ -25,13 +25,11 @@ import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMI
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,39 +43,37 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager.widget.ViewPager.PageTransformer;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import picframe.at.picframe.R;
-import picframe.at.picframe.helper.GlobalPhoneFuncs;
-import picframe.at.picframe.helper.viewpager.AccordionTransformer;
-import picframe.at.picframe.helper.viewpager.BackgroundToForegroundTransformer;
-import picframe.at.picframe.helper.viewpager.CubeOutTransformer;
-import picframe.at.picframe.helper.viewpager.CustomViewPager;
-import picframe.at.picframe.helper.viewpager.DrawFromBackTransformer;
-import picframe.at.picframe.helper.viewpager.EXIF_helper;
-import picframe.at.picframe.helper.viewpager.FadeInFadeOutTransformer;
-import picframe.at.picframe.helper.viewpager.FlipVerticalTransformer;
-import picframe.at.picframe.helper.viewpager.ForegroundToBackgroundTransformer;
-import picframe.at.picframe.helper.viewpager.Gestures;
-import picframe.at.picframe.helper.viewpager.RotateDownTransformer;
-import picframe.at.picframe.helper.viewpager.StackTransformer;
-import picframe.at.picframe.helper.viewpager.ZoomInTransformer;
-import picframe.at.picframe.helper.viewpager.ZoomOutPageTransformer;
+import picframe.at.picframe.utils.FileUtils;
+import picframe.at.picframe.utils.transformers.AccordionTransformer;
+import picframe.at.picframe.utils.transformers.BackgroundToForegroundTransformer;
+import picframe.at.picframe.utils.transformers.CubeOutTransformer;
+import picframe.at.picframe.utils.transformers.CustomViewPager;
+import picframe.at.picframe.utils.transformers.DrawFromBackTransformer;
+import picframe.at.picframe.utils.EXIFUtils;
+import picframe.at.picframe.utils.transformers.FadeInFadeOutTransformer;
+import picframe.at.picframe.utils.transformers.FlipVerticalTransformer;
+import picframe.at.picframe.utils.transformers.ForegroundToBackgroundTransformer;
+import picframe.at.picframe.utils.Gestures;
+import picframe.at.picframe.utils.transformers.RotateDownTransformer;
+import picframe.at.picframe.utils.transformers.StackTransformer;
+import picframe.at.picframe.utils.transformers.ZoomInTransformer;
+import picframe.at.picframe.utils.transformers.ZoomOutPageTransformer;
 import picframe.at.picframe.settings.AppData;
 
-// TODO reset the slideshow when settings change
-// TODO transitions are offset by one
-// TODO the first transition should be the normal slideshow
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity {
 
     private static class SlideShowTimerTask extends TimerTask {
         private final WeakReference<MainActivity> mainActivityWeakReference;
@@ -99,6 +95,80 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
+    private class ImagePagerAdapter extends PagerAdapter {
+        private final LayoutInflater inflater;
+        private int localPage;
+
+        public ImagePagerAdapter(Activity activity) {
+            this.inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            updateSettings();
+        }
+
+        @Override
+        public int getCount() {
+            return size;
+        }
+
+        @Override
+        public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
+            return view == object;
+        }
+
+        @NonNull
+        @Override
+        public Object instantiateItem(@NonNull ViewGroup container, final int position) {
+            View viewLayout = inflater.inflate(R.layout.fullscreen_layout, container, false);
+
+            ImageView imgDisplay = viewLayout.findViewById(R.id.photocontainer);
+
+            if (AppData.getScaling(getApplicationContext())) {
+                imgDisplay.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            } else {
+                imgDisplay.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            }
+            this.localPage = position;
+            if (!showExamplePictures) {
+                imgDisplay.setImageBitmap(EXIFUtils.decodeFile(mFilePaths.get(this.localPage), getApplicationContext()));
+            } else {
+                String currentImage = "ex" + this.localPage;
+                int currentImageID = getApplicationContext().getResources().getIdentifier(currentImage, "drawable", getApplicationContext().getPackageName());
+                imgDisplay.setImageResource(currentImageID);
+            }
+            imgDisplay.setOnTouchListener(new Gestures(getApplicationContext()) {
+                @Override
+                public void onSwipeBottom() {
+                    showActionBar();
+                }
+
+                @Override
+                public void onSwipeTop() {
+                    hideActionBar();
+                }
+
+                @Override
+                public void onTap() {
+                    showActionBar();
+                }
+            });
+            container.addView(viewLayout);
+            return viewLayout;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, @NonNull Object object) {
+            container.removeView((RelativeLayout) object);
+        }
+
+        private void updateSettings() {
+            mFilePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
+            setSize();
+        }
+
+        public int getPage() {
+            return this.localPage;
+        }
+    }
+
     public final static int APP_STORAGE_ACCESS_REQUEST_CODE = 501;
     private final static boolean DEBUG = true;
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -112,11 +182,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private Timer slideshowTimer;
 
     private String mOldPath;
-    private boolean mOldRecursive;
-    private RelativeLayout mainLayout;
     private boolean paused;
 
-    private ArrayList<PageTransformer> transformers;
+    private final PageTransformer[] TRANSFORMERS = new PageTransformer[]{new ZoomOutPageTransformer(), new AccordionTransformer(), new BackgroundToForegroundTransformer(), new CubeOutTransformer(), new DrawFromBackTransformer(), new FadeInFadeOutTransformer(), new FlipVerticalTransformer(), new ForegroundToBackgroundTransformer(), new RotateDownTransformer(), new StackTransformer(), new ZoomInTransformer(), new ZoomOutPageTransformer(),};
     private List<String> mFilePaths;
     private int size;
     private int currentPage;
@@ -128,19 +196,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mainLayout = findViewById(R.id.mainLayout);
         paused = false;
-        enableGestures();
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().hide();
-        }
-        initializeTransitions();
+        hideActionBar();
         pager = findViewById(R.id.pager);
         loadAdapter();
         setUpSlideShow();
 
         mOldPath = AppData.getImagePath(getApplicationContext());
-        mOldRecursive = AppData.getRecursiveSearch(getApplicationContext());
 
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -158,10 +220,20 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         });
 
         currentPage = AppData.getCurrentPage(getApplicationContext());
-        if (pager.getAdapter().getCount() < currentPage) {
+        if (Objects.requireNonNull(pager.getAdapter()).getCount() < currentPage) {
             currentPage = 1;
         }
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+        AppData.getSharedPreferences(this).registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {
+            if (key != null) {
+                if (key.equals(getString(R.string.sett_key_transition))
+                        || key.equals(getString(R.string.sett_key_randomize))
+                        || key.equals(getString(R.string.sett_key_srcpath_sd))
+                        || key.equals(getString(R.string.sett_key_scaling))
+                ) {
+                    startSlideshow();
+                }
+            }
+        });
     }
 
     private void setupTimer() {
@@ -172,11 +244,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         int displayTimeInMillis = AppData.getDisplayTime(this) * 1000;
         debug("Display time: " + displayTimeInMillis);
         slideshowTimer.schedule(slideShowTimerTask, displayTimeInMillis, displayTimeInMillis);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, @Nullable String key) {
-
     }
 
     @Override
@@ -208,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.activity_main_menu, menu);
         return true;
     }
 
@@ -232,7 +299,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         slideshowTimer = null;
 
         mOldPath = AppData.getImagePath(getApplicationContext());
-        mOldRecursive = AppData.getRecursiveSearch(getApplicationContext());
 
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -250,15 +316,25 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     public void showActionBar() {
-        if (this.getSupportActionBar() != null) {
-            this.getSupportActionBar().show();
+        ActionBar actionBar = this.getSupportActionBar();
+        if (actionBar != null) {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            actionBar.show();
         }
         if (actionbarHideHandler != null) {
             actionbarHideHandler.removeCallbacksAndMessages(null);
             actionbarHideHandler = null;
         }
         actionbarHideHandler = new Handler(Looper.getMainLooper());
-        actionbarHideHandler.postDelayed(() -> getSupportActionBar().hide(), ACTION_BAR_SHOW_DURATION);
+        actionbarHideHandler.postDelayed(this::hideActionBar, ACTION_BAR_SHOW_DURATION);
+    }
+
+    private void hideActionBar() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        ActionBar actionBar = this.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
     }
 
     private void nextSlideshowPage() {
@@ -283,87 +359,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         debug("SAVING PAGE  " + currentPage);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        slideshowTimer.purge();
-    }
-
-    private class ImagePagerAdapter extends PagerAdapter {
-        private final LayoutInflater inflater;
-        private int localpage;
-
-        public ImagePagerAdapter(Activity activity) {
-            this.inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            updateSettings();
-        }
-
-        @Override
-        public int getCount() {
-            return size;
-        }
-
-        @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return view == object;
-        }
-
-        @NonNull
-        @Override
-        public Object instantiateItem(@NonNull ViewGroup container, final int position) {
-            View viewLayout = inflater.inflate(R.layout.fullscreen_layout, container, false);
-
-            ImageView imgDisplay = viewLayout.findViewById(R.id.photocontainer);
-
-            if (AppData.getScaling(getApplicationContext())) {
-                imgDisplay.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            } else {
-                imgDisplay.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            }
-            this.localpage = position;
-            if (!showExamplePictures) {
-                imgDisplay.setImageBitmap(EXIF_helper.decodeFile(mFilePaths.get(this.localpage), getApplicationContext()));
-            } else {
-                String currentImage = "ex" + this.localpage;
-                int currentImageID = getApplicationContext().getResources().getIdentifier(currentImage, "drawable", getApplicationContext().getPackageName());
-                imgDisplay.setImageResource(currentImageID);
-            }
-            imgDisplay.setOnTouchListener(new Gestures(getApplicationContext()) {
-                @Override
-                public void onSwipeBottom() {
-                    showActionBar();
-                }
-
-                @Override
-                public void onSwipeTop() {
-                    if (getSupportActionBar() != null) {
-                        getSupportActionBar().hide();
-                    }
-                }
-
-                @Override
-                public void onTap() {
-                    showActionBar();
-                }
-            });
-            container.addView(viewLayout);
-            return viewLayout;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView((RelativeLayout) object);
-        }
-
-        private void updateSettings() {
-            mFilePaths = GlobalPhoneFuncs.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
-            setSize();
-        }
-
-        public int getPage() {
-            return this.localpage;
-        }
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -378,8 +373,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     private void startSlideshow() {
-        if (!GlobalPhoneFuncs.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext())).isEmpty()) {
-            if (!AppData.getImagePath(getApplicationContext()).equals(mOldPath) || mOldRecursive != AppData.getRecursiveSearch(getApplicationContext())) {
+        if (!FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext())).isEmpty()) {
+            if (!AppData.getImagePath(getApplicationContext()).equals(mOldPath)) {
                 loadAdapter();
             }
         }
@@ -387,7 +382,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         updateFileList();
 
         // start on the page we left in onPause, unless it was the first or last picture (as this freezes the slideshow)
-        if (currentPage < pager.getAdapter().getCount() - 1 && currentPage > 0) {
+        if (currentPage < Objects.requireNonNull(pager.getAdapter()).getCount() - 1 && currentPage > 0) {
             pager.setCurrentItem(currentPage);
         }
 
@@ -395,12 +390,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     public void updateFileList() {
-        if (AppData.getImagePath(getApplicationContext()).equals("")) {
+        if (AppData.getImagePath(getApplicationContext()).isEmpty()) {
             showExamplePictures = true;
             Toast.makeText(getApplicationContext(), R.string.main_toast_noFolderPathSet, Toast.LENGTH_SHORT).show();
         } else {
-            mFilePaths = GlobalPhoneFuncs.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
-            showExamplePictures = mFilePaths.isEmpty() || mFilePaths.size() <= 0;
+            mFilePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
+            showExamplePictures = mFilePaths.isEmpty();
             if (showExamplePictures) {
                 Toast.makeText(getApplicationContext(), R.string.main_toast_noFileFound, Toast.LENGTH_SHORT).show();
             }
@@ -410,66 +405,27 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     private void loadAdapter() {
-        imagePagerAdapter = new ImagePagerAdapter(MainActivity.this);
-        try {
-            pager.setAdapter(imagePagerAdapter);
-            currentPage = imagePagerAdapter.getPage();
-        } catch (Exception e) {
-            Log.e("Image adapter error", Log.getStackTraceString(e));
-        }
-    }
-
-    private void enableGestures() {
-        mainLayout.setOnTouchListener(new Gestures(getApplicationContext()) {
-            @Override
-            public void onSwipeBottom() {
-                showActionBar();
-            }
-
-            @Override
-            public void onSwipeTop() {
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().hide();
-                }
-            }
-        });
+        imagePagerAdapter = new ImagePagerAdapter(this);
+        pager.setAdapter(imagePagerAdapter);
+        currentPage = imagePagerAdapter.getPage();
     }
 
     public void selectTransformer() {
-        if (AppData.getTransitionStyle(getApplicationContext()) == 11) {
-            pager.setPageTransformer(true, transformers.get(random()));
-        } else {
-            pager.setPageTransformer(true, transformers.get(AppData.getTransitionStyle(getApplicationContext())));
+        int[] transitionTypeValues = getResources().getIntArray(R.array.transitionTypeValues);
+        int transitionStyleIndex = AppData.getTransitionStyle(getApplicationContext());
+        // If the style is the random style, we cycle randomly select another style
+        if (transitionStyleIndex == transitionTypeValues[transitionTypeValues.length - 1]) {
+            transitionStyleIndex = transitionTypeValues[(int) (Math.random() * (transitionTypeValues.length - 1))];
         }
-    }
-
-    private int random() {
-        //Random from 0 to 13
-        return (int) (Math.random() * 11);
+        pager.setPageTransformer(true, TRANSFORMERS[transitionStyleIndex]);
     }
 
     private void setSize() {
         if (!showExamplePictures) {
             size = mFilePaths.size();
-        }
-        else {
+        } else {
             size = nbOfExamplePictures;
         }
-    }
-
-    private void initializeTransitions() {
-        transformers = new ArrayList<>();
-        this.transformers.add(new AccordionTransformer());
-        this.transformers.add(new BackgroundToForegroundTransformer());
-        this.transformers.add(new CubeOutTransformer());
-        this.transformers.add(new DrawFromBackTransformer());
-        this.transformers.add(new FadeInFadeOutTransformer());
-        this.transformers.add(new FlipVerticalTransformer());
-        this.transformers.add(new ForegroundToBackgroundTransformer());
-        this.transformers.add(new RotateDownTransformer());
-        this.transformers.add(new StackTransformer());
-        this.transformers.add(new ZoomInTransformer());
-        this.transformers.add(new ZoomOutPageTransformer());
     }
 
 

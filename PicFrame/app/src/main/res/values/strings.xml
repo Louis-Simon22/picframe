@@ -48,7 +48,6 @@
     <string name="sett_key_displaytime" translatable="false">DisplayTime</string>
     <string name="sett_key_transition" translatable="false">Transition</string>
     <string name="sett_key_srcpath_sd" translatable="false">SrcPath_sd</string>
-    <string name="sett_key_recursiveSearch" translatable="false">RecursiveSearch</string>
     <string name="sett_key_firstStart" translatable="false">FirstStart</string>
     <!-- SETTINGS STRINGS END -->
 

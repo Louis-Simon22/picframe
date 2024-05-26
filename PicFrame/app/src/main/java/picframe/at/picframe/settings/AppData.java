@@ -67,12 +67,6 @@ public class AppData {
                 (String) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_srcpath_sd));
     }
 
-    // flag whether to include images in subfolders (on=true)
-    public static boolean getRecursiveSearch(Context context) {
-        return getSharedPreferences(context).getBoolean(context.getString(R.string.sett_key_recursiveSearch),
-                (Boolean) SettingsDefaults.getDefaultValueForKey(R.string.sett_key_recursiveSearch));
-    }
-
     // Always returns the path to the img folder of current src type
     // holds the root-path to the displayed images
     public static String getImagePath(Context context) {

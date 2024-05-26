@@ -1,6 +1,5 @@
-package picframe.at.picframe.helper.viewpager;
+package picframe.at.picframe.utils.transformers;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;

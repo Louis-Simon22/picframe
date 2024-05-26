@@ -1,9 +1,8 @@
-package picframe.at.picframe.helper.local_storage;
+package picframe.at.picframe.utils;
 
 import android.os.Environment;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
 
 /**

@@ -1,6 +1,7 @@
-package picframe.at.picframe.helper.viewpager;
+package picframe.at.picframe.utils;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
@@ -9,13 +10,11 @@ import android.view.View;
 /**
  * Created by ussher on 02.05.15.
  */
-public class Gestures implements View.OnTouchListener{
+public class Gestures implements View.OnTouchListener {
 
     private final GestureDetector detector;
-    private Context context;
 
     public Gestures(Context context) {
-        this.context = context;
         detector = new GestureDetector(context, new GestureListener());
     }
 
@@ -25,16 +24,16 @@ public class Gestures implements View.OnTouchListener{
     public void onSwipeRight() {
     }
 
-    public void onSwipeBottom(){
+    public void onSwipeBottom() {
     }
 
-    public void onSwipeTop(){
+    public void onSwipeTop() {
     }
 
-    public void doubleTap(){
+    public void doubleTap() {
     }
 
-    public void onTap(){
+    public void onTap() {
     }
 
     public boolean onTouch(View v, MotionEvent event) {
@@ -52,13 +51,13 @@ public class Gestures implements View.OnTouchListener{
         }
 
         @Override
-        public boolean onDoubleTap(MotionEvent event){
+        public boolean onDoubleTap(MotionEvent event) {
             doubleTap();
             return true;
         }
 
         @Override
-        public boolean onSingleTapUp(MotionEvent event){
+        public boolean onSingleTapUp(MotionEvent event) {
             onTap();
             return true;
         }
@@ -87,9 +86,8 @@ public class Gestures implements View.OnTouchListener{
                     }
                 }
                 result = true;
-
-            } catch (Exception exception) {
-                exception.printStackTrace();
+            } catch (Exception e) {
+                Log.e(Gestures.class.getCanonicalName(), Log.getStackTraceString(e));
             }
             return result;
         }

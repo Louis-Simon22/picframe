@@ -2,12 +2,10 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:icon="@android:drawable/ic_menu_preferences"
         android:key="sett_key_cat1"
         android:title="@string/settings_category_source">
     </PreferenceCategory>
     <PreferenceCategory
-        android:icon="@android:drawable/ic_menu_preferences"
         android:key="sett_key_cat2"
         android:title="@string/settings_category_slideshow">
         <ListPreference

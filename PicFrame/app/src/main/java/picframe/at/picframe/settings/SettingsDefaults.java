@@ -17,7 +17,6 @@ public class SettingsDefaults {
         defValues.put(R.string.sett_key_randomize, true);
         defValues.put(R.string.sett_key_displaytime, "4");
         defValues.put(R.string.sett_key_srcpath_sd, "");
-        defValues.put(R.string.sett_key_recursiveSearch, true);
         defValues.put(R.string.sett_key_transition, "10");
     }
     /*  <string name="sett_key_firstStart" translatable="false">FirstStart</string>     */
