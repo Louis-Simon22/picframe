@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "picframe.at.picframe"
+    namespace = "louissimonmcnicoll.simpleframe"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "picframe.at.picframe"
+        applicationId = "louissimonmcnicoll.simpleframe"
         minSdk = 30
         targetSdk = 34
         versionCode = 1

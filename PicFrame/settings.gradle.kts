@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PicFrame"
+rootProject.name = "SimpleFrame"
 include(":app")
  

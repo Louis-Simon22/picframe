@@ -9,7 +9,7 @@
     android:background="#ff2a2a2a"
     android:orientation="vertical">
 
-    <picframe.at.picframe.utils.transformers.CustomViewPager
+    <louissimonmcnicoll.simpleframe.utils.transformers.CustomViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
