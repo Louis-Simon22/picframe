@@ -1,6 +1,6 @@
 # SimpleFrame
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75">](https://fdroid.gitlab.io/artwork/badge/get-it-on.png)
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75" alt="Link to F-Droid download">](https://fdroid.gitlab.io/artwork/badge/get-it-on.png)
 
 Display a slideshow of images to transform older devices in picture frames.
 
@@ -8,11 +8,12 @@ There are no networking features since old devices are inherently insecure. I re
 
 ## Screenshots
 
-![Stack transition](en-US/images/phoneScreenshots/1.png "Stack transition")
-![Fade transition](en-US/images/phoneScreenshots/2.png "Stack transition")
-![Accordion transition](en-US/images/phoneScreenshots/3.png "Stack transition")
-![Stack transition landscape](en-US/images/phoneScreenshots/4.png "Stack transition landscape")
-![Settings](en-US/images/phoneScreenshots/5.png "Settings")
+![<img src="en-US/images/phoneScreenshots/1.png" width="300" alt="Stack transition">](en-US/images/phoneScreenshots/1.png "Stack transition")
+![<img src="en-US/images/phoneScreenshots/2.png" width="300" alt="Fade transition">](en-US/images/phoneScreenshots/1.png "Fade transition")
+![<img src="en-US/images/phoneScreenshots/3.png" width="300" alt="Accordion transition">](en-US/images/phoneScreenshots/1.png "Accordion transition")
+Stack transition landscape
+![<img src="en-US/images/phoneScreenshots/4.png" height="300" alt="Stack transition landscape">](en-US/images/phoneScreenshots/1.png "Stack transition landscape")
+![<img src="en-US/images/phoneScreenshots/5.png" width="300" alt="Settings">](en-US/images/phoneScreenshots/1.png "Settings")
 
 ### License
 
