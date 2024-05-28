@@ -1,5 +1,13 @@
 # SimpleFrame
+
 [![alt text][playstoreimage]][playstorelink]
+
+[fdroidimage]: https://fdroid.gitlab.io/artwork/badge/get-it-on.png
+[fdroidlink]: https://fdroid.gitlab.io/artwork/badge/get-it-on.png
+
+Display a slideshow of images to transform older devices in picture frames.
+
+There are no networking features since old devices are inherently insecure. I recommend transfering the images using a USB connection.
 
 ### License
 
