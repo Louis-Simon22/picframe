@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int nbOfExamplePictures = 6;
-    private static final int ACTION_BAR_SHOW_DURATION = 5000;
+    private static final int ACTION_BAR_SHOW_DURATION = 4000;
     private static boolean showExamplePictures = false;
 
     private ImagePagerAdapter imagePagerAdapter;

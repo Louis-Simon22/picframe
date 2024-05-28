@@ -1,0 +1,5 @@
+Affiche les images d'un dossier dans un diaporama avec 12 types de transition disponibles.
+
+Supporte les fichiers locaux seulement. Je suggère de transférer les fichier depuis un ordinateur à l'aide d'une connexion USB.
+
+Conçu pour trouver une utilité aux vieux appareils qui ne sont plus utiles. Dans ce but l'application n'a pas de fonctionnalité impliquant le réseau puisque les vieux appareils sont souvent vulnérables.

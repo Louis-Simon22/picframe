@@ -1,0 +1,5 @@
+Displays images in a folder as a slideshow with 12 transition types to choose from.
+
+Supports local files only. I suggest transfering the files from a computer using a USB connection.
+
+Meant to find a use for older unsupported devices that are just sitting around. Accordingly the app does not have any networking features since these old devices are often inherently insecure.
