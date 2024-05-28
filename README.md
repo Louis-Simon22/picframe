@@ -2,18 +2,26 @@
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75" alt="Link to F-Droid download">](https://fdroid.gitlab.io/artwork/badge/get-it-on.png)
 
-Display a slideshow of images to transform older devices in picture frames.
+Displays a slideshow of images to transform older devices into picture frames.
 
 There are no networking features since old devices are inherently insecure. I recommend transfering the images using a USB connection.
 
 ## Screenshots
 
-![<img src="en-US/images/phoneScreenshots/1.png" width="300" alt="Stack transition">](en-US/images/phoneScreenshots/1.png "Stack transition")
-![<img src="en-US/images/phoneScreenshots/2.png" width="300" alt="Fade transition">](en-US/images/phoneScreenshots/1.png "Fade transition")
-![<img src="en-US/images/phoneScreenshots/3.png" width="300" alt="Accordion transition">](en-US/images/phoneScreenshots/1.png "Accordion transition")
-Stack transition landscape
-![<img src="en-US/images/phoneScreenshots/4.png" height="300" alt="Stack transition landscape">](en-US/images/phoneScreenshots/1.png "Stack transition landscape")
-![<img src="en-US/images/phoneScreenshots/5.png" width="300" alt="Settings">](en-US/images/phoneScreenshots/1.png "Settings")
+<img src="en-US/images/phoneScreenshots/1.png" width="300" alt="Stack transition" title="Stack transition">
+<br/><br/><br/>
+
+<img src="en-US/images/phoneScreenshots/2.png" height="300" alt="Fade transition" title="Fade transition">
+<br/><br/><br/>
+
+<img src="en-US/images/phoneScreenshots/3.png" height="300" alt="Accordion transition" title="Accordion transition">
+<br/><br/><br/>
+
+<img src="en-US/images/phoneScreenshots/4.png" height="300" alt="Stack transition landscape" title="Stack transition landscape">
+<br/><br/><br/>
+
+<img src="en-US/images/phoneScreenshots/5.png" width="300" alt="Settings" title="Settings">
+<br/><br/><br/>
 
 ### License
 

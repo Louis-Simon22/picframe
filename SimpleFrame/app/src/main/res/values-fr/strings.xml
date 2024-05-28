@@ -1,7 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- MAIN STRINGS -->
-    <string name="action_downloadNow">Télécharger maintenant</string>
     <string name="main_toast_noSDReadRights">Impossible de lire la carte SD.</string>
     <string name="main_toast_noSDWriteRights">Impossible d\'écrire sur la carte SD</string>
     <string name="main_toast_noFileFound">Aucune image trouvée dans le dossier spécifié</string>
@@ -39,20 +38,5 @@
     <string name="sett_dialog_negBtn">Annuler</string>
     <string name="sett_yes">Oui</string>
     <string name="sett_no">Non</string>
-
-    <!-- ABOUT STRINGS -->
-    <string name="action_about">À propos</string>
-    <string name="title_activity_about">À propos</string>
-    <string name="about_developedBy">Développé par:</string>
-    <string name="about_photosBy">Images par:</string>
-    <string name="about_license_button">Licenses</string>
-    <!-- ABOUT STRINGS END -->
-    <!-- STATUS STRINGS -->
-    <string name="status_nbFiles">Quantité de fichiers dans le dossier sélectionné</string>
-    <string name="status_local">Statut</string>
-    <string name="status_currentFolder">Current display folder</string>
-    <string name="status_buttonAbout">Développé par, Crédits photos, Licenses</string>
-    <string name="title_activity_status">Statut</string>
-    <!-- STATUS STRINGS END -->
 
 </resources>

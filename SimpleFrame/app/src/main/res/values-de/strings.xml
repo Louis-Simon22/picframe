@@ -1,6 +1,5 @@
 <resources>
     <!-- MAIN STRINGS -->
-    <string name="action_downloadNow">Jetzt herunterladen</string>
     <string name="main_toast_noSDReadRights">Von externer SD-Karte konnte nicht gelesen werden.</string>
     <string name="main_toast_noSDWriteRights">Auf externe SD-Karte konnte nicht geschrieben werden.</string>
     <string name="main_toast_noFileFound">Keine Bilder im angegebenen Ordner gefunden.</string>
