@@ -1,0 +1,17 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context=".activities.MainActivity"
+    android:clipChildren="false"
+    android:id="@+id/mainLayout"
+    android:background="#ff2a2a2a"
+    android:orientation="vertical">
+
+    <louissimonmcnicoll.simpleframe.utils.transformers.CustomViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</RelativeLayout>

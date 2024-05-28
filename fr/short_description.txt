@@ -1,0 +1,1 @@
+Application simple pour afficher des images comme dans un cadre numérique.

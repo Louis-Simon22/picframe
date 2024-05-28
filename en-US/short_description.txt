@@ -1,0 +1,1 @@
+Simple app to display pictures as in a digital frame.

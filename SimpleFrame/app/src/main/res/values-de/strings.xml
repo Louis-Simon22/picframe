@@ -1,0 +1,55 @@
+<resources>
+    <!-- MAIN STRINGS -->
+    <string name="action_downloadNow">Jetzt herunterladen</string>
+    <string name="main_toast_noSDReadRights">Von externer SD-Karte konnte nicht gelesen werden.</string>
+    <string name="main_toast_noSDWriteRights">Auf externe SD-Karte konnte nicht geschrieben werden.</string>
+    <string name="main_toast_noFileFound">Keine Bilder im angegebenen Ordner gefunden.</string>
+    <string name="main_toast_exitmsg">Zum Verlassen erneut \'zurück\' drücken.</string>
+    <!-- MAIN STRINGS END -->
+
+    <!-- SETTINGS STRINGS -->
+    <string name="action_settings">Einstellungen</string>
+    <string name="title_activity_settings">Einstellungen</string>
+    <string name="sett_displayTime">Anzeigedauer</string>
+    <string name="sett_displayTimeSumm">Anzeigedauer eines Bildes</string>
+    <string name="sett_randomize">Zufällige Bildwiedergabe</string>
+    <string name="sett_randomizeSummOff">Bilderwiedergabe ist nicht zufällig (Reihenfolge nach Dateinamen)</string>
+    <string name="sett_randomizeSumm">Ob die Bilderwiedergabe zufällig oder nach Dateinamen sein soll</string>
+    <string name="sett_randomizeSummOn">Bilderwiedergabe ist zufällig</string>
+    <string name="sett_scaling">Bilder skalieren</string>
+    <string name="sett_scalingSumm">Ob Bilder den ganzen Bildschirm ausfüllen sollen</string>
+    <string name="sett_scalingSummOff">Bilder werden vollständig angezeigt</string>
+    <string name="sett_scalingSummOn">Bilder werden skaliert um den Bildschirm auszufüllen</string>
+    <string name="settings_category_source">Quellen-Einstellungen</string>
+    <string name="settings_category_slideshow">Anzeige-Einstellungen</string>
+    <string name="sett_srcPath_externalSD">Pfade zu Bildern</string>
+    <string name="sett_recursiveSearch">Bilder aus Unterordnern anzeigen</string>
+    <string name="sett_recursiveSearchSumm">Ob Bilder aus Unterordnern angezeigt werden sollen</string>
+    <string name="sett_recursiveSearchSummOff">Bilder aus Unterordnern werden nicht angezeigt</string>
+    <string name="sett_recursiveSearchSummOn">Bilder aus Unterordnern werden angezeigt</string>
+    <string name="sett_transition">Übergänge</string>
+    <string name="sett_transitionSumm">Wählen Sie, welche Bildübergänge Sie bei der Slideshow haben wollen.</string>
+    <!-- Settings Dialog Strings -->
+    <string name="sett_dialog_title">Ordner auswählen</string>
+    <string name="sett_dialog_posBtn">Ok</string>
+    <string name="sett_dialog_negBtn">Abbrechen</string>
+    <!-- SETTINGS STRINGS END -->
+
+    <!-- ABOUT STRINGS -->
+    <string name="action_about">Über uns</string>
+    <string name="title_activity_about">Über uns</string>
+    <string name="about_license_button">Lizenzen</string>
+    <!-- ABOUT STRINGS END -->
+    <string name="main_toast_noFolderPathSet">Sie haben noch keinen Ordner Bilder-Ornder ausgewählt! </string>
+    <string name="about_developedBy">Entwickelt von:</string>
+    <string name="about_photosBy">Fotos von:</string>
+    <string name="sett_no">Nein</string>
+    <string name="sett_yes">Ja</string>
+    <string name="sett_loginCheck_failure">Fehlgeschlagen</string>
+    <string name="sett_loginCheck_success">Erfolgreich</string>
+    <string name="status_local">Status</string>
+    <string name="status_nbFiles">Dateien in aktuellen Anzeigeordner</string>
+    <string name="status_buttonAbout">Entwickler, Fotografen, Lizenen</string>
+    <string name="status_currentFolder">Aktueller Ordner</string>
+    <string name="title_activity_status">Status</string>
+</resources>
