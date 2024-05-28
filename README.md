@@ -1,6 +1,6 @@
 # SimpleFrame
 
-[![alt text](https://fdroid.gitlab.io/artwork/badge/get-it-on.png)](https://fdroid.gitlab.io/artwork/badge/get-it-on.png)
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75">](https://fdroid.gitlab.io/artwork/badge/get-it-on.png)
 
 Display a slideshow of images to transform older devices in picture frames.
 
