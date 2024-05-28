@@ -1,9 +1,6 @@
 # SimpleFrame
 
-[![alt text][playstoreimage]][playstorelink]
-
-[fdroidimage]: https://fdroid.gitlab.io/artwork/badge/get-it-on.png
-[fdroidlink]: https://fdroid.gitlab.io/artwork/badge/get-it-on.png
+[![alt text][https://fdroid.gitlab.io/artwork/badge/get-it-on.png]][https://fdroid.gitlab.io/artwork/badge/get-it-on.png]
 
 Display a slideshow of images to transform older devices in picture frames.
 
