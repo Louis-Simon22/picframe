@@ -6,8 +6,7 @@
     tools:context=".activities.MainActivity"
     android:clipChildren="false"
     android:id="@+id/mainLayout"
-    android:background="#ff2a2a2a"
-    android:orientation="vertical">
+    android:background="#ff2a2a2a">
 
     <louissimonmcnicoll.simpleframe.utils.transformers.CustomViewPager
         android:id="@+id/pager"
@@ -16,4 +15,12 @@
 
     </louissimonmcnicoll.simpleframe.utils.transformers.CustomViewPager>
 
+    <TextView
+        android:id="@+id/no_file_found"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:text="@string/main_toast_noFileFound" />
 </RelativeLayout>

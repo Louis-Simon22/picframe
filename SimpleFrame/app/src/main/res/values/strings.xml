@@ -4,8 +4,7 @@
     <string name="app_name" translatable="false">SimpleFrame</string>
     <string name="app_version" translatable="false">2.0.0</string>
     <string name="main_toast_noSDReadRights">Can\'t read from external SD card.</string>
-    <string name="main_toast_noSDWriteRights">Can\'t write to external SD card.</string>
-    <string name="main_toast_noFileFound">No image files were found in given directory.</string>
+    <string name="main_toast_noFileFound">No image files were found in the given directory.\nHead over to the settings to change it</string>
     <string name="main_toast_exitmsg">Press back again to leave.</string>
     <string name="main_toast_noFolderPathSet">You have not set a picture source folder yet!</string>
     <!-- MAIN STRINGS END -->

@@ -1,13 +1,12 @@
 package louissimonmcnicoll.simpleframe.activities;
 
-import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
-
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -19,12 +18,15 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager.widget.ViewPager.PageTransformer;
@@ -53,6 +55,7 @@ import louissimonmcnicoll.simpleframe.utils.transformers.ZoomInTransformer;
 import louissimonmcnicoll.simpleframe.utils.transformers.ZoomOutPageTransformer;
 import louissimonmcnicoll.simpleframe.settings.AppData;
 
+// TODO handle first time instructions
 public class MainActivity extends AppCompatActivity {
 
     private static class SlideShowTimerTask extends TimerTask {
@@ -86,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return size;
+            return pictureCount;
         }
 
         @Override
@@ -107,13 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 imgDisplay.setScaleType(ImageView.ScaleType.FIT_CENTER);
             }
             this.localPage = position;
-            if (!showExamplePictures) {
-                imgDisplay.setImageBitmap(EXIFUtils.decodeFile(mFilePaths.get(this.localPage), getApplicationContext()));
-            } else {
-                String currentImage = "ex" + this.localPage;
-                int currentImageID = getApplicationContext().getResources().getIdentifier(currentImage, "drawable", getApplicationContext().getPackageName());
-                imgDisplay.setImageResource(currentImageID);
-            }
+            imgDisplay.setImageBitmap(EXIFUtils.decodeFile(mFilePaths.get(this.localPage), getApplicationContext()));
             imgDisplay.setOnTouchListener(new Gestures(getApplicationContext()) {
                 @Override
                 public void onSwipeBottom() {
@@ -141,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
 
         private void updateSettings() {
             mFilePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
-            setSize();
         }
 
         public int getPage() {
@@ -150,14 +146,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public final static int APP_STORAGE_ACCESS_REQUEST_CODE = 501;
+    public final static int REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 501;
     private final static boolean DEBUG = true;
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final int nbOfExamplePictures = 6;
     private static final int ACTION_BAR_SHOW_DURATION = 4000;
-    private static boolean showExamplePictures = false;
 
     private ImagePagerAdapter imagePagerAdapter;
+    private TextView noFileFoundTextView;
     private CustomViewPager pager;
     private Timer slideshowTimer;
 
@@ -166,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final PageTransformer[] TRANSFORMERS = new PageTransformer[]{new ZoomOutPageTransformer(), new AccordionTransformer(), new BackgroundToForegroundTransformer(), new CubeOutTransformer(), new DrawFromBackTransformer(), new FadeInFadeOutTransformer(), new FlipVerticalTransformer(), new ForegroundToBackgroundTransformer(), new RotateDownTransformer(), new StackTransformer(), new ZoomInTransformer(), new ZoomOutPageTransformer(),};
     private List<String> mFilePaths;
-    private int size;
+    private int pictureCount;
     private int currentPage;
     private Handler actionbarHideHandler;
     public boolean mDoubleBackToExitPressedOnce;
@@ -177,10 +173,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         paused = false;
-        hideActionBar();
         pager = findViewById(R.id.pager);
+        noFileFoundTextView = findViewById(R.id.no_file_found);
         loadAdapter();
-        setUpSlideShow();
 
         mOldPath = AppData.getImagePath(getApplicationContext());
 
@@ -216,6 +211,29 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        setupTimer();
+
+        // refresh toolbar options (hide/show downloadNow)
+        supportInvalidateOptionsMenu();
+        if (AppData.getFirstAppStart(getApplicationContext())) {
+            AppData.setFirstAppStart(getApplicationContext(), false);
+        }
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_MEDIA_IMAGES},
+                    REQUEST_READ_EXTERNAL_STORAGE_PERMISSION);
+        } else if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_READ_EXTERNAL_STORAGE_PERMISSION);
+        }
+    }
+
     private void setupTimer() {
         if (slideshowTimer == null) {
             slideshowTimer = new Timer();
@@ -233,22 +251,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        setupTimer();
-
-        // refresh toolbar options (hide/show downloadNow)
-        supportInvalidateOptionsMenu();
-        if (AppData.getFirstAppStart(getApplicationContext())) {
-            AppData.setFirstAppStart(getApplicationContext(), false);
-        }
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        if (!Environment.isExternalStorageManager()) {
-            Intent intent = new Intent(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + getApplicationContext().getPackageName()));
-            startActivityForResult(intent, APP_STORAGE_ACCESS_REQUEST_CODE);
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_READ_EXTERNAL_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startActivity(new Intent(this, SettingsActivity.class));
+            } else {
+                Toast.makeText(this, R.string.main_toast_noSDReadRights, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -339,17 +349,12 @@ public class MainActivity extends AppCompatActivity {
         debug("SAVING PAGE  " + currentPage);
     }
 
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == APP_STORAGE_ACCESS_REQUEST_CODE && Environment.isExternalStorageManager()) {
+        if (requestCode == APP_STORAGE_ACCESS_REQUEST_CODE) {
             startSlideshow();
         }
-    }
-
-    private void setUpSlideShow() {
-        pager.setScrollDurationFactor(8);
     }
 
     private void startSlideshow() {
@@ -359,29 +364,19 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        updateFileList();
+        mFilePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
+        pictureCount = mFilePaths.size();
+        imagePagerAdapter.notifyDataSetChanged();
 
         // start on the page we left in onPause, unless it was the first or last picture (as this freezes the slideshow)
         if (currentPage < Objects.requireNonNull(pager.getAdapter()).getCount() - 1 && currentPage > 0) {
             pager.setCurrentItem(currentPage);
         }
+        pager.setScrollDurationFactor(8);
 
-        setUpSlideShow();
-    }
+        hideActionBar();
 
-    public void updateFileList() {
-        if (AppData.getImagePath(getApplicationContext()).isEmpty()) {
-            showExamplePictures = true;
-            Toast.makeText(getApplicationContext(), R.string.main_toast_noFolderPathSet, Toast.LENGTH_SHORT).show();
-        } else {
-            mFilePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
-            showExamplePictures = mFilePaths.isEmpty();
-            if (showExamplePictures) {
-                Toast.makeText(getApplicationContext(), R.string.main_toast_noFileFound, Toast.LENGTH_SHORT).show();
-            }
-        }
-        setSize(); // size is count of images in folder, or constant if example pictures are used
-        imagePagerAdapter.notifyDataSetChanged();
+        noFileFoundTextView.setVisibility(pictureCount == 0 ? View.INVISIBLE : View.VISIBLE);
     }
 
     private void loadAdapter() {
@@ -399,15 +394,6 @@ public class MainActivity extends AppCompatActivity {
         }
         pager.setPageTransformer(true, TRANSFORMERS[transitionStyleIndex]);
     }
-
-    private void setSize() {
-        if (!showExamplePictures) {
-            size = mFilePaths.size();
-        } else {
-            size = nbOfExamplePictures;
-        }
-    }
-
 
     private void debug(String msg) {
         if (DEBUG) {
