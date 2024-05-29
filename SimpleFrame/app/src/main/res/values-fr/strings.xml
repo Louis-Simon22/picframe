@@ -2,10 +2,11 @@
 
     <!-- MAIN STRINGS -->
     <string name="main_toast_noSDReadRights">Impossible de lire la carte SD.</string>
-    <string name="main_toast_noSDWriteRights">Impossible d\'écrire sur la carte SD</string>
     <string name="main_toast_noFileFound">Aucune image trouvée dans le dossier spécifié</string>
     <string name="main_toast_exitmsg">Appuyez à nouveau pour quitter</string>
     <string name="main_toast_noFolderPathSet">Aucun dossier n\'a encore été sélectionné</string>
+    <string name="swipe_down_to_show_action_bar">Glissez vers le bas pour montrer le menu</string>
+    <string name="touch_to_show_action_bar">Touchez pour montrer le menu</string>
     <!-- MAIN STRINGS END -->
 
     <!-- SETTINGS STRINGS -->
@@ -29,14 +30,12 @@
     <string name="sett_recursiveSearchSummOn">Les sous dossiers seront inclus</string>
     <string name="sett_transition">Transition</string>
     <string name="sett_transitionSumm">Choisissez la transition désirée pour le diaporama</string>
-    <string name="sett_loginCheck_success">Succès</string>
-    <string name="sett_loginCheck_failure">Échec</string>
     <string name="sett_srcPath_externalSD">Chemin vers les images</string>
-    <!-- Settings Dialog Strings -->
     <string name="sett_dialog_title">Choisissez le dossier des images</string>
     <string name="sett_dialog_posBtn" tools:ignore="ButtonCase">Ok</string>
     <string name="sett_dialog_negBtn">Annuler</string>
     <string name="sett_yes">Oui</string>
     <string name="sett_no">Non</string>
+    <!-- SETTINGS STRINGS END -->
 
 </resources>

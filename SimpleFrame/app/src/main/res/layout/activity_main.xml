@@ -1,26 +1,86 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    tools:context=".activities.MainActivity"
-    android:clipChildren="false"
     android:id="@+id/mainLayout"
-    android:background="#ff2a2a2a">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ff2a2a2a"
+    android:clipChildren="false"
+    tools:context=".activities.MainActivity">
 
     <louissimonmcnicoll.simpleframe.utils.transformers.CustomViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent" />
 
-    </louissimonmcnicoll.simpleframe.utils.transformers.CustomViewPager>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/no_file_found"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:textSize="20sp"
-        android:text="@string/main_toast_noFileFound" />
+        <LinearLayout
+            android:id="@+id/layout_swipe_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:gravity="center"
+            tools:ignore="UseCompoundDrawables">
+
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:importantForAccessibility="no"
+                app:srcCompat="@drawable/ic_swipe_down" />
+
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxWidth="300dp"
+                android:text="@string/swipe_down_to_show_action_bar"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/no_file_found"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/main_toast_noFileFound"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            android:id="@+id/layout_touch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:gravity="center"
+            tools:ignore="UseCompoundDrawables">
+
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:importantForAccessibility="no"
+                app:srcCompat="@drawable/ic_touch" />
+
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxWidth="300dp"
+                android:text="@string/touch_to_show_action_bar"
+                android:textSize="20sp" />
+        </LinearLayout>
+    </LinearLayout>
 </RelativeLayout>

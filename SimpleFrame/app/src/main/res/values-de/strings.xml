@@ -1,9 +1,11 @@
 <resources>
     <!-- MAIN STRINGS -->
     <string name="main_toast_noSDReadRights">Von externer SD-Karte konnte nicht gelesen werden.</string>
-    <string name="main_toast_noSDWriteRights">Auf externe SD-Karte konnte nicht geschrieben werden.</string>
     <string name="main_toast_noFileFound">Keine Bilder im angegebenen Ordner gefunden.</string>
+    <string name="main_toast_noFolderPathSet">Sie haben noch keinen Ordner Bilder-Ornder ausgewählt! </string>
     <string name="main_toast_exitmsg">Zum Verlassen erneut \'zurück\' drücken.</string>
+    <string name="swipe_down_to_show_action_bar">Wipele nach unten um den Aktionsbalken anzuzeigen</string>
+    <string name="touch_to_show_action_bar">Betreffen um den Aktionsbalken anzuzeigen</string>
     <!-- MAIN STRINGS END -->
 
     <!-- SETTINGS STRINGS -->
@@ -28,27 +30,11 @@
     <string name="sett_recursiveSearchSummOn">Bilder aus Unterordnern werden angezeigt</string>
     <string name="sett_transition">Übergänge</string>
     <string name="sett_transitionSumm">Wählen Sie, welche Bildübergänge Sie bei der Slideshow haben wollen.</string>
-    <!-- Settings Dialog Strings -->
     <string name="sett_dialog_title">Ordner auswählen</string>
     <string name="sett_dialog_posBtn">Ok</string>
     <string name="sett_dialog_negBtn">Abbrechen</string>
-    <!-- SETTINGS STRINGS END -->
-
-    <!-- ABOUT STRINGS -->
-    <string name="action_about">Über uns</string>
-    <string name="title_activity_about">Über uns</string>
-    <string name="about_license_button">Lizenzen</string>
-    <!-- ABOUT STRINGS END -->
-    <string name="main_toast_noFolderPathSet">Sie haben noch keinen Ordner Bilder-Ornder ausgewählt! </string>
-    <string name="about_developedBy">Entwickelt von:</string>
-    <string name="about_photosBy">Fotos von:</string>
     <string name="sett_no">Nein</string>
     <string name="sett_yes">Ja</string>
-    <string name="sett_loginCheck_failure">Fehlgeschlagen</string>
-    <string name="sett_loginCheck_success">Erfolgreich</string>
-    <string name="status_local">Status</string>
-    <string name="status_nbFiles">Dateien in aktuellen Anzeigeordner</string>
-    <string name="status_buttonAbout">Entwickler, Fotografen, Lizenen</string>
-    <string name="status_currentFolder">Aktueller Ordner</string>
-    <string name="title_activity_status">Status</string>
+    <!-- SETTINGS STRINGS END -->
+
 </resources>
