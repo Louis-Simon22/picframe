@@ -1,5 +1,6 @@
 package louissimonmcnicoll.simpleframe.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -84,8 +85,8 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     private void setupFolderPicker() {
         Preference folderPicker;
         folderPicker = new Preference(this);
-        folderPicker.setTitle(getString(R.string.sett_srcPath_externalSD));
-        folderPicker.setSummary(AppData.getImagePath(getApplicationContext()));
+        setFolderPickerTitle(folderPicker);
+        folderPicker.setSummary(getString(R.string.sett_srcPath_externalSD));
         folderPicker.setDefaultValue("");
         folderPicker.setKey(getString(R.string.sett_key_srcpath_sd));
         Context self = this;
@@ -108,46 +109,57 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         sourceSettingsPreferenceCategory.addPreference(folderPicker);
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (sharedPreferences != null && key != null) {
+            // If we change the image path, we also want to reset the current page to start over
+            if (key.equals(getString(R.string.sett_key_srcpath_sd))){
+                // We use commit() and not apply() because we want the update to be immediate
+                sharedPreferences.edit().putInt(getString(R.string.sett_key_currentPage), 1).commit();
+            }
+            updateAllFieldTitles();
             debug("CHANGED| Key:" + key + " ++ Value: " + sharedPreferences.getAll().get(key));
         }
     }
 
     public void updateAllFieldTitles() {
         for (String prefKey : editableTitleFields) {
-            updateFieldTitle(prefKey);
+            updateField(prefKey);
         }
     }
 
-    public void updateFieldTitle(String key) {
-        Preference mPref = findPreference(key);
-        String mPrefTitle = "";
-        String mPrefValue = "";
-
-        if (mPref != null) {
-            if (mPref instanceof ListPreference) {
-                mPrefValue = (String) sharedPreferences.getAll().get(key);
-                if (!Objects.equals(mPrefValue, ((ListPreference) mPref).getValue())) {
-                    ((ListPreference) mPref).setValue(mPrefValue);
+    public void updateField(String key) {
+        Preference pref = findPreference(key);
+        if (pref != null) {
+            String prefValue = "";
+            if (pref instanceof ListPreference) {
+                prefValue = (String) sharedPreferences.getAll().get(key);
+                if (!Objects.equals(prefValue, ((ListPreference) pref).getValue())) {
+                    ((ListPreference) pref).setValue(prefValue);
                 }
-                int index = ((ListPreference) mPref).findIndexOfValue(mPrefValue);
-                mPrefValue = (String) ((ListPreference) mPref).getEntries()[index];
-            } else if (mPref instanceof EditTextPreference) {
-                mPrefValue = (String) sharedPreferences.getAll().get(key);
-            } else if (getString(R.string.sett_key_srcpath_sd).equals(mPref.getKey())) {
-                mPrefValue = AppData.getSourcePath(getApplicationContext());
+                int index = ((ListPreference) pref).findIndexOfValue(prefValue);
+                prefValue = (String) ((ListPreference) pref).getEntries()[index];
+            } else if (pref instanceof EditTextPreference) {
+                prefValue = (String) sharedPreferences.getAll().get(key);
             }
             if (getString(R.string.sett_key_displaytime).equals(key)) {
-                mPrefTitle = getString(R.string.sett_displayTime);
+                String prefTitle = getString(R.string.sett_displayTime);
+                pref.setTitle(prefTitle + ": " + prefValue);
             } else if (getString(R.string.sett_key_transition).equals(key)) {
-                mPrefTitle = getString(R.string.sett_transition);
+                String prefTitle = getString(R.string.sett_transition);
+                pref.setTitle(prefTitle + ": " + prefValue);
             } else if (getString(R.string.sett_key_srcpath_sd).equals(key)) {
-                mPrefTitle = getString(R.string.sett_srcPath_externalSD);
+                setFolderPickerTitle(pref);
             }
-            mPref.setTitle(mPrefTitle + ": " + mPrefValue);
         }
+    }
+
+    private void setFolderPickerTitle(Preference folderPickerPref){
+        String imagePath = AppData.getImagePath(getApplicationContext());
+        // Make the path a bit mo
+        imagePath = imagePath.replace("/storage/emulated/0/", "");
+        folderPickerPref.setTitle(imagePath);
     }
 
     @Override

@@ -12,7 +12,7 @@
             android:title="@string/sett_displayTime"
             android:summary="@string/sett_displayTimeSumm"
             android:key="@string/sett_key_displaytime"
-            android:defaultValue="2"
+            android:defaultValue="5"
             android:entries="@array/displayTimeEntries"
             android:entryValues="@array/displayTimeValues" />
         <ListPreference

@@ -2,11 +2,10 @@
 
     <!-- MAIN STRINGS -->
     <string name="main_toast_noSDReadRights">Impossible de lire la carte SD.</string>
-    <string name="main_toast_noFileFound">Aucune image trouvée dans le dossier spécifié</string>
+    <string name="no_files_found">Aucune image trouvée dans le dossier spécifié. Allez dans les paramètres pour le changer</string>
     <string name="main_toast_exitmsg">Appuyez à nouveau pour quitter</string>
     <string name="main_toast_noFolderPathSet">Aucun dossier n\'a encore été sélectionné</string>
-    <string name="swipe_down_to_show_action_bar">Glissez vers le bas pour montrer le menu</string>
-    <string name="touch_to_show_action_bar">Touchez pour montrer le menu</string>
+    <string name="touch_or_swipe_down_to_show_action_bar">Touchez ou glissez vers le bas pour montrer le menu</string>
     <!-- MAIN STRINGS END -->
 
     <!-- SETTINGS STRINGS -->
@@ -36,6 +35,7 @@
     <string name="sett_dialog_negBtn">Annuler</string>
     <string name="sett_yes">Oui</string>
     <string name="sett_no">Non</string>
+    <string name="loading_slideshow">Chargement du diaporama…</string>
     <!-- SETTINGS STRINGS END -->
 
 </resources>

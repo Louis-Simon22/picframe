@@ -55,7 +55,7 @@ import louissimonmcnicoll.simpleframe.utils.transformers.ZoomInTransformer;
 import louissimonmcnicoll.simpleframe.utils.transformers.ZoomOutPageTransformer;
 import louissimonmcnicoll.simpleframe.settings.AppData;
 
-// TODO handle first time instructions
+// TODO first image is shown twice when current page is reset
 public class MainActivity extends AppCompatActivity {
 
     private static class SlideShowTimerTask extends TimerTask {
@@ -100,17 +100,12 @@ public class MainActivity extends AppCompatActivity {
         @NonNull
         @Override
         public Object instantiateItem(@NonNull ViewGroup container, final int position) {
-            View viewLayout = inflater.inflate(R.layout.fullscreen_layout, container, false);
-
-            ImageView imgDisplay = viewLayout.findViewById(R.id.photocontainer);
-
-            if (AppData.getScaling(getApplicationContext())) {
-                imgDisplay.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            } else {
-                imgDisplay.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            }
             this.localPage = position;
-            imgDisplay.setImageBitmap(EXIFUtils.decodeFile(mFilePaths.get(this.localPage), getApplicationContext()));
+
+            View viewLayout = inflater.inflate(R.layout.photo_container, container, false);
+            ImageView imgDisplay = viewLayout.findViewById(R.id.photocontainer);
+            imgDisplay.setScaleType(AppData.getScaling(getApplicationContext()) ? ImageView.ScaleType.CENTER_CROP : ImageView.ScaleType.FIT_CENTER);
+            imgDisplay.setImageBitmap(EXIFUtils.decodeFile(filePaths.get(this.localPage), getApplicationContext()));
             imgDisplay.setOnTouchListener(new Gestures(getApplicationContext()) {
                 @Override
                 public void onSwipeBottom() {
@@ -137,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void updateSettings() {
-            mFilePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
+            filePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
         }
 
         public int getPage() {
@@ -153,18 +148,21 @@ public class MainActivity extends AppCompatActivity {
     private static final int ACTION_BAR_SHOW_DURATION = 4000;
 
     private ImagePagerAdapter imagePagerAdapter;
+    private View tutorial;
     private TextView noFileFoundTextView;
+    private TextView loadingSlideshow;
     private CustomViewPager pager;
     private Timer slideshowTimer;
 
-    private String mOldPath;
+    private String loadedImagePath;
     private boolean paused;
 
     private final PageTransformer[] TRANSFORMERS = new PageTransformer[]{new ZoomOutPageTransformer(), new AccordionTransformer(), new BackgroundToForegroundTransformer(), new CubeOutTransformer(), new DrawFromBackTransformer(), new FadeInFadeOutTransformer(), new FlipVerticalTransformer(), new ForegroundToBackgroundTransformer(), new RotateDownTransformer(), new StackTransformer(), new ZoomInTransformer(), new ZoomOutPageTransformer(),};
-    private List<String> mFilePaths;
+    private List<String> filePaths;
     private int pictureCount;
     private int currentPage;
     private Handler actionbarHideHandler;
+    private Handler slideshowStartHandler;
     public boolean mDoubleBackToExitPressedOnce;
 
     @Override
@@ -174,10 +172,12 @@ public class MainActivity extends AppCompatActivity {
 
         paused = false;
         pager = findViewById(R.id.pager);
-        noFileFoundTextView = findViewById(R.id.no_file_found);
-        loadAdapter();
+        noFileFoundTextView = findViewById(R.id.no_files_found);
+        loadingSlideshow = findViewById(R.id.loading_slideshow);
+        tutorial = findViewById(R.id.tutorial);
 
-        mOldPath = AppData.getImagePath(getApplicationContext());
+        actionbarHideHandler = new Handler(Looper.getMainLooper());
+        slideshowStartHandler = new Handler(Looper.getMainLooper());
 
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -193,22 +193,6 @@ public class MainActivity extends AppCompatActivity {
                 selectTransformer();
             }
         });
-
-        currentPage = AppData.getCurrentPage(getApplicationContext());
-        if (Objects.requireNonNull(pager.getAdapter()).getCount() < currentPage) {
-            currentPage = 1;
-        }
-        AppData.getSharedPreferences(this).registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {
-            if (key != null) {
-                if (key.equals(getString(R.string.sett_key_transition))
-                        || key.equals(getString(R.string.sett_key_randomize))
-                        || key.equals(getString(R.string.sett_key_srcpath_sd))
-                        || key.equals(getString(R.string.sett_key_scaling))
-                ) {
-                    startSlideshow();
-                }
-            }
-        });
     }
 
     @Override
@@ -221,9 +205,10 @@ public class MainActivity extends AppCompatActivity {
         supportInvalidateOptionsMenu();
         if (AppData.getFirstAppStart(getApplicationContext())) {
             AppData.setFirstAppStart(getApplicationContext(), false);
+        } else {
+            tutorial.setVisibility(View.INVISIBLE);
         }
 
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_MEDIA_IMAGES},
@@ -232,6 +217,13 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     REQUEST_READ_EXTERNAL_STORAGE_PERMISSION);
         }
+
+        hideActionBar();
+
+        // Start slideshow with a very short delay so we don't freeze on the previous activity
+        pager.setVisibility(View.INVISIBLE);
+        loadingSlideshow.setVisibility(View.VISIBLE);
+        slideshowStartHandler.postDelayed(this::startSlideshow, 1);
     }
 
     private void setupTimer() {
@@ -288,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
         slideshowTimer.cancel();
         slideshowTimer = null;
 
-        mOldPath = AppData.getImagePath(getApplicationContext());
+        loadedImagePath = AppData.getImagePath(getApplicationContext());
 
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -306,16 +298,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showActionBar() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         ActionBar actionBar = this.getSupportActionBar();
         if (actionBar != null) {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             actionBar.show();
         }
-        if (actionbarHideHandler != null) {
-            actionbarHideHandler.removeCallbacksAndMessages(null);
-            actionbarHideHandler = null;
-        }
-        actionbarHideHandler = new Handler(Looper.getMainLooper());
         actionbarHideHandler.postDelayed(this::hideActionBar, ACTION_BAR_SHOW_DURATION);
     }
 
@@ -358,31 +345,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startSlideshow() {
-        if (!FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext())).isEmpty()) {
-            if (!AppData.getImagePath(getApplicationContext()).equals(mOldPath)) {
-                loadAdapter();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        String imagePath = AppData.getImagePath(getApplicationContext());
+        if (!imagePath.equals(loadedImagePath) && !FileUtils.getFileList(getApplicationContext(), imagePath).isEmpty()) {
+
+            loadedImagePath = imagePath;
+
+            imagePagerAdapter = new ImagePagerAdapter(this);
+            pager.setAdapter(imagePagerAdapter);
+
+            filePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
+            pictureCount = filePaths.size();
+            imagePagerAdapter.notifyDataSetChanged();
+
+            currentPage = AppData.getCurrentPage(getApplicationContext());
+            if (imagePagerAdapter.getCount() < currentPage) {
+                currentPage = 1;
             }
+            // start on the page we left in onPause, unless it was the first or last picture (as this freezes the slideshow)
+            if (currentPage < Objects.requireNonNull(pager.getAdapter()).getCount() - 1 && currentPage > 0) {
+                pager.setCurrentItem(currentPage);
+            }
+            pager.setScrollDurationFactor(8);
         }
-
-        mFilePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
-        pictureCount = mFilePaths.size();
-        imagePagerAdapter.notifyDataSetChanged();
-
-        // start on the page we left in onPause, unless it was the first or last picture (as this freezes the slideshow)
-        if (currentPage < Objects.requireNonNull(pager.getAdapter()).getCount() - 1 && currentPage > 0) {
-            pager.setCurrentItem(currentPage);
+        loadingSlideshow.setVisibility(View.INVISIBLE);
+        if (pictureCount == 0) {
+            noFileFoundTextView.setVisibility(View.VISIBLE);
+            pager.setVisibility(View.INVISIBLE);
+        } else {
+            noFileFoundTextView.setVisibility(View.INVISIBLE);
+            pager.setVisibility(View.VISIBLE);
         }
-        pager.setScrollDurationFactor(8);
-
-        hideActionBar();
-
-        noFileFoundTextView.setVisibility(pictureCount == 0 ? View.INVISIBLE : View.VISIBLE);
-    }
-
-    private void loadAdapter() {
-        imagePagerAdapter = new ImagePagerAdapter(this);
-        pager.setAdapter(imagePagerAdapter);
-        currentPage = imagePagerAdapter.getPage();
     }
 
     public void selectTransformer() {

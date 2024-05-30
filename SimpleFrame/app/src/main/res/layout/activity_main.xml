@@ -20,67 +20,73 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/layout_swipe_down"
+            android:id="@+id/tutorial"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_gravity="center"
+            android:layout_weight="6"
             android:gravity="center"
+            android:orientation="vertical"
             tools:ignore="UseCompoundDrawables">
 
-            <ImageView
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:importantForAccessibility="no"
-                app:srcCompat="@drawable/ic_swipe_down" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                tools:ignore="UseCompoundDrawables">
 
-            <Space
-                android:layout_width="5dp"
-                android:layout_height="wrap_content" />
+                <ImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_swipe_down" />
+
+                <Space
+                    android:layout_width="10dp"
+                    android:layout_height="wrap_content" />
+
+                <ImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_touch" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
                 android:maxWidth="300dp"
-                android:text="@string/swipe_down_to_show_action_bar"
+                android:text="@string/touch_or_swipe_down_to_show_action_bar"
                 android:textSize="20sp" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/no_file_found"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="@string/main_toast_noFileFound"
-            android:textSize="20sp" />
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="10" />
 
-        <LinearLayout
-            android:id="@+id/layout_touch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:gravity="center"
-            tools:ignore="UseCompoundDrawables">
-
-            <ImageView
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:importantForAccessibility="no"
-                app:srcCompat="@drawable/ic_touch" />
-
-            <Space
-                android:layout_width="5dp"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxWidth="300dp"
-                android:text="@string/touch_to_show_action_bar"
-                android:textSize="20sp" />
-        </LinearLayout>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/no_files_found"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:text="@string/no_files_found"
+        android:textSize="20sp"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/loading_slideshow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:text="@string/loading_slideshow"
+        android:textSize="20sp"
+        android:visibility="invisible" />
 </RelativeLayout>
