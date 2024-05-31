@@ -39,23 +39,22 @@ import java.util.TimerTask;
 
 import louissimonmcnicoll.simpleframe.R;
 import louissimonmcnicoll.simpleframe.utils.FileUtils;
-import louissimonmcnicoll.simpleframe.utils.transformers.AccordionTransformer;
-import louissimonmcnicoll.simpleframe.utils.transformers.BackgroundToForegroundTransformer;
-import louissimonmcnicoll.simpleframe.utils.transformers.CubeOutTransformer;
-import louissimonmcnicoll.simpleframe.utils.transformers.CustomViewPager;
-import louissimonmcnicoll.simpleframe.utils.transformers.DrawFromBackTransformer;
+import louissimonmcnicoll.simpleframe.transformers.AccordionTransformer;
+import louissimonmcnicoll.simpleframe.transformers.BackgroundToForegroundTransformer;
+import louissimonmcnicoll.simpleframe.transformers.CubeOutTransformer;
+import louissimonmcnicoll.simpleframe.custom_views.CustomViewPager;
+import louissimonmcnicoll.simpleframe.transformers.DrawFromBackTransformer;
 import louissimonmcnicoll.simpleframe.utils.EXIFUtils;
-import louissimonmcnicoll.simpleframe.utils.transformers.FadeInFadeOutTransformer;
-import louissimonmcnicoll.simpleframe.utils.transformers.FlipVerticalTransformer;
-import louissimonmcnicoll.simpleframe.utils.transformers.ForegroundToBackgroundTransformer;
+import louissimonmcnicoll.simpleframe.transformers.FadeInFadeOutTransformer;
+import louissimonmcnicoll.simpleframe.transformers.FlipVerticalTransformer;
+import louissimonmcnicoll.simpleframe.transformers.ForegroundToBackgroundTransformer;
 import louissimonmcnicoll.simpleframe.utils.Gestures;
-import louissimonmcnicoll.simpleframe.utils.transformers.RotateDownTransformer;
-import louissimonmcnicoll.simpleframe.utils.transformers.StackTransformer;
-import louissimonmcnicoll.simpleframe.utils.transformers.ZoomInTransformer;
-import louissimonmcnicoll.simpleframe.utils.transformers.ZoomOutPageTransformer;
+import louissimonmcnicoll.simpleframe.transformers.RotateDownTransformer;
+import louissimonmcnicoll.simpleframe.transformers.StackTransformer;
+import louissimonmcnicoll.simpleframe.transformers.ZoomInTransformer;
+import louissimonmcnicoll.simpleframe.transformers.ZoomOutPageTransformer;
 import louissimonmcnicoll.simpleframe.settings.AppData;
 
-// TODO first image is shown twice when current page is reset
 public class MainActivity extends AppCompatActivity {
 
     private static class SlideShowTimerTask extends TimerTask {
@@ -84,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         public ImagePagerAdapter(Activity activity) {
             this.inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            updateSettings();
+            filePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
         }
 
         @Override
@@ -106,22 +105,7 @@ public class MainActivity extends AppCompatActivity {
             ImageView imgDisplay = viewLayout.findViewById(R.id.photocontainer);
             imgDisplay.setScaleType(AppData.getScaling(getApplicationContext()) ? ImageView.ScaleType.CENTER_CROP : ImageView.ScaleType.FIT_CENTER);
             imgDisplay.setImageBitmap(EXIFUtils.decodeFile(filePaths.get(this.localPage), getApplicationContext()));
-            imgDisplay.setOnTouchListener(new Gestures(getApplicationContext()) {
-                @Override
-                public void onSwipeBottom() {
-                    showActionBar();
-                }
-
-                @Override
-                public void onSwipeTop() {
-                    hideActionBar();
-                }
-
-                @Override
-                public void onTap() {
-                    showActionBar();
-                }
-            });
+            imgDisplay.setOnTouchListener(showActionBarGestures);
             container.addView(viewLayout);
             return viewLayout;
         }
@@ -129,10 +113,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void destroyItem(ViewGroup container, int position, @NonNull Object object) {
             container.removeView((RelativeLayout) object);
-        }
-
-        private void updateSettings() {
-            filePaths = FileUtils.getFileList(getApplicationContext(), AppData.getImagePath(getApplicationContext()));
         }
 
         public int getPage() {
@@ -153,11 +133,24 @@ public class MainActivity extends AppCompatActivity {
     private TextView loadingSlideshow;
     private CustomViewPager pager;
     private Timer slideshowTimer;
+    private Gestures showActionBarGestures;
 
     private String loadedImagePath;
     private boolean paused;
 
-    private final PageTransformer[] TRANSFORMERS = new PageTransformer[]{new ZoomOutPageTransformer(), new AccordionTransformer(), new BackgroundToForegroundTransformer(), new CubeOutTransformer(), new DrawFromBackTransformer(), new FadeInFadeOutTransformer(), new FlipVerticalTransformer(), new ForegroundToBackgroundTransformer(), new RotateDownTransformer(), new StackTransformer(), new ZoomInTransformer(), new ZoomOutPageTransformer(),};
+    private final PageTransformer[] TRANSFORMERS = new PageTransformer[]{
+            new AccordionTransformer(),
+            new BackgroundToForegroundTransformer(),
+            new CubeOutTransformer(),
+            new DrawFromBackTransformer(),
+            new FadeInFadeOutTransformer(),
+            new FlipVerticalTransformer(),
+            new ForegroundToBackgroundTransformer(),
+            new RotateDownTransformer(),
+            new StackTransformer(),
+            new ZoomInTransformer(),
+            new ZoomOutPageTransformer(),
+    };
     private List<String> filePaths;
     private int pictureCount;
     private int currentPage;
@@ -168,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_activity);
 
         paused = false;
         pager = findViewById(R.id.pager);
@@ -178,6 +171,25 @@ public class MainActivity extends AppCompatActivity {
 
         actionbarHideHandler = new Handler(Looper.getMainLooper());
         slideshowStartHandler = new Handler(Looper.getMainLooper());
+
+        showActionBarGestures = new Gestures(getApplicationContext()) {
+            @Override
+            public void onSwipeBottom() {
+                showActionBar();
+            }
+
+            @Override
+            public void onSwipeTop() {
+                hideActionBar();
+            }
+
+            @Override
+            public void onTap() {
+                showActionBar();
+            }
+        };
+        View mainActivity = findViewById(R.id.main_activity);
+        mainActivity.setOnTouchListener(showActionBarGestures);
 
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -220,9 +232,10 @@ public class MainActivity extends AppCompatActivity {
 
         hideActionBar();
 
-        // Start slideshow with a very short delay so we don't freeze on the previous activity
         pager.setVisibility(View.INVISIBLE);
         loadingSlideshow.setVisibility(View.VISIBLE);
+        noFileFoundTextView.setVisibility(View.INVISIBLE);
+        // Start slideshow with a very short delay so we don't freeze on the previous activity
         slideshowStartHandler.postDelayed(this::startSlideshow, 1);
     }
 
@@ -298,6 +311,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showActionBar() {
+        debug("show");
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         ActionBar actionBar = this.getSupportActionBar();
         if (actionBar != null) {
@@ -315,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void nextSlideshowPage() {
-        if (imagePagerAdapter.getCount() > 0 && !paused) {
+        if (!paused && imagePagerAdapter != null && imagePagerAdapter.getCount() > 0) {
             int localpage = pager.getCurrentItem();
             localpage++;
             // We loop when reaching the end
@@ -331,7 +345,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         // Save the current Page to resume after next start
-        // maybe not right here will test
         AppData.setCurrentPage(getApplicationContext(), currentPage);
         debug("SAVING PAGE  " + currentPage);
     }
@@ -348,7 +361,6 @@ public class MainActivity extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         String imagePath = AppData.getImagePath(getApplicationContext());
         if (!imagePath.equals(loadedImagePath) && !FileUtils.getFileList(getApplicationContext(), imagePath).isEmpty()) {
-
             loadedImagePath = imagePath;
 
             imagePagerAdapter = new ImagePagerAdapter(this);
@@ -381,9 +393,9 @@ public class MainActivity extends AppCompatActivity {
     public void selectTransformer() {
         int[] transitionTypeValues = getResources().getIntArray(R.array.transitionTypeValues);
         int transitionStyleIndex = AppData.getTransitionStyle(getApplicationContext());
-        // If the style is the random style, we cycle randomly select another style
+        // If the style is the random style, we randomly select another style
         if (transitionStyleIndex == transitionTypeValues[transitionTypeValues.length - 1]) {
-            transitionStyleIndex = transitionTypeValues[(int) (Math.random() * (transitionTypeValues.length - 1))];
+            transitionStyleIndex = transitionTypeValues[(int) (Math.random() * TRANSFORMERS.length)];
         }
         pager.setPageTransformer(true, TRANSFORMERS[transitionStyleIndex]);
     }

@@ -1,17 +1,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mainLayout"
+    android:id="@+id/main_activity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ff2a2a2a"
     android:clipChildren="false"
     tools:context=".activities.MainActivity">
-
-    <louissimonmcnicoll.simpleframe.utils.transformers.CustomViewPager
-        android:id="@+id/pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -89,4 +84,9 @@
         android:text="@string/loading_slideshow"
         android:textSize="20sp"
         android:visibility="invisible" />
+
+    <louissimonmcnicoll.simpleframe.custom_views.CustomViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </RelativeLayout>

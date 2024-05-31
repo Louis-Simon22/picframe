@@ -19,22 +19,27 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 
 import louissimonmcnicoll.simpleframe.R;
 import louissimonmcnicoll.simpleframe.settings.AppData;
+import louissimonmcnicoll.simpleframe.settings.SettingsDefaults;
 import louissimonmcnicoll.simpleframe.settings.SimpleFileDialog;
 
 @SuppressWarnings("deprecation")
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
+    private static final boolean DEBUG = true;
+    private static final int[] EDITABLE_FIELD_IDS = new int[]{
+            R.string.sett_key_displaytime,
+            R.string.sett_key_transition,
+            R.string.sett_key_srcpath_sd,
+    };
+
     private PreferenceCategory sourceSettingsPreferenceCategory;
     private SharedPreferences sharedPreferences;
-    private final ArrayList<String> editableTitleFields = new ArrayList<>();
-    private final static boolean DEBUG = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +54,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         addPreferencesFromResource(R.xml.settings);
         sourceSettingsPreferenceCategory = (PreferenceCategory) findPreference("sett_key_cat1");
 
-        populateEditableFieldsList();
-        updateAllFieldTitles();
+        updateAllTextFields();
         setupFolderPicker();
     }
 
@@ -76,22 +80,17 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         });
     }
 
-    private void populateEditableFieldsList() {
-        editableTitleFields.add(getString(R.string.sett_key_displaytime));
-        editableTitleFields.add(getString(R.string.sett_key_transition));
-        editableTitleFields.add(getString(R.string.sett_key_srcpath_sd));
-    }
-
     private void setupFolderPicker() {
         Preference folderPicker;
         folderPicker = new Preference(this);
         setFolderPickerTitle(folderPicker);
         folderPicker.setSummary(getString(R.string.sett_srcPath_externalSD));
-        folderPicker.setDefaultValue("");
+        folderPicker.setDefaultValue(SettingsDefaults.getDefaultValueForKey(R.string.sett_srcPath_externalSD));
         folderPicker.setKey(getString(R.string.sett_key_srcpath_sd));
         Context self = this;
         folderPicker.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             String _chosenDir = AppData.getSourcePath(self);
+
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 // The code in this function will be executed when the dialog OK button is pushed
@@ -102,7 +101,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                                     _chosenDir = chosenDir;
                                     AppData.setSdSourcePath(self, _chosenDir);
                                 });
-                FolderChooseDialog.chooseFile_or_Dir(_chosenDir);
+                FolderChooseDialog.chooseFileOrDir(_chosenDir);
                 return true;
             }
         });
@@ -114,34 +113,44 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (sharedPreferences != null && key != null) {
             // If we change the image path, we also want to reset the current page to start over
-            if (key.equals(getString(R.string.sett_key_srcpath_sd))){
+            if (key.equals(getString(R.string.sett_key_srcpath_sd))) {
                 // We use commit() and not apply() because we want the update to be immediate
                 sharedPreferences.edit().putInt(getString(R.string.sett_key_currentPage), 1).commit();
             }
-            updateAllFieldTitles();
+            updateAllTextFields();
             debug("CHANGED| Key:" + key + " ++ Value: " + sharedPreferences.getAll().get(key));
         }
     }
 
-    public void updateAllFieldTitles() {
-        for (String prefKey : editableTitleFields) {
-            updateField(prefKey);
+    public void updateAllTextFields() {
+        for (int fieldId : EDITABLE_FIELD_IDS) {
+            updateTextField(fieldId);
         }
     }
 
-    public void updateField(String key) {
+    public void updateTextField(int fieldId) {
+        String key = getString(fieldId);
         Preference pref = findPreference(key);
         if (pref != null) {
+            String defaultValue = (String) SettingsDefaults.getDefaultValueForKey(fieldId);
+            pref.setDefaultValue(defaultValue);
             String prefValue = "";
             if (pref instanceof ListPreference) {
+                ListPreference listPref = (ListPreference) pref;
                 prefValue = (String) sharedPreferences.getAll().get(key);
-                if (!Objects.equals(prefValue, ((ListPreference) pref).getValue())) {
-                    ((ListPreference) pref).setValue(prefValue);
+                if (prefValue == null) {
+                    prefValue = defaultValue;
                 }
-                int index = ((ListPreference) pref).findIndexOfValue(prefValue);
-                prefValue = (String) ((ListPreference) pref).getEntries()[index];
+                if (!Objects.equals(prefValue, listPref.getValue())) {
+                    listPref.setValue(prefValue);
+                }
+                int index = listPref.findIndexOfValue(prefValue);
+                prefValue = (String) listPref.getEntries()[index];
             } else if (pref instanceof EditTextPreference) {
                 prefValue = (String) sharedPreferences.getAll().get(key);
+                if (prefValue == null) {
+                    prefValue = defaultValue;
+                }
             }
             if (getString(R.string.sett_key_displaytime).equals(key)) {
                 String prefTitle = getString(R.string.sett_displayTime);
@@ -155,7 +164,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         }
     }
 
-    private void setFolderPickerTitle(Preference folderPickerPref){
+    private void setFolderPickerTitle(Preference folderPickerPref) {
         String imagePath = AppData.getImagePath(getApplicationContext());
         // Make the path a bit mo
         imagePath = imagePath.replace("/storage/emulated/0/", "");

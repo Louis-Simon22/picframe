@@ -60,7 +60,7 @@ public class SimpleFileDialog {
     // chooseFile_or_Dir(String dir) - load directory chooser dialog for initial
     // input 'dir' directory
     ////////////////////////////////////////////////////////////////////////////////
-    public void chooseFile_or_Dir(String dir) {
+    public void chooseFileOrDir(String dir) {
         File dirFile = new File(dir);
         if (! dirFile.exists() || ! dirFile.isDirectory()) {
             dir = m_sdcardDirectory;

@@ -1,41 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--suppress DeprecatedClassUsageInspection -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- The default values are dynamically assigned in the activity -->
     <PreferenceCategory
         android:key="sett_key_cat1"
         android:title="@string/settings_category_source">
+        <!-- A field is dynamically created here in the activity-->
     </PreferenceCategory>
     <PreferenceCategory
         android:key="sett_key_cat2"
         android:title="@string/settings_category_slideshow">
         <ListPreference
-            android:title="@string/sett_displayTime"
-            android:summary="@string/sett_displayTimeSumm"
-            android:key="@string/sett_key_displaytime"
-            android:defaultValue="5"
             android:entries="@array/displayTimeEntries"
-            android:entryValues="@array/displayTimeValues" />
+            android:entryValues="@array/displayTimeValues"
+            android:key="@string/sett_key_displaytime"
+            android:summary="@string/sett_displayTimeSumm"
+            android:title="@string/sett_displayTime" />
         <ListPreference
-            android:title="@string/sett_transition"
-            android:summary="@string/sett_transitionSumm"
-            android:key="@string/sett_key_transition"
-            android:defaultValue="10"
             android:entries="@array/transitionTypeEntries"
-            android:entryValues="@array/transitionTypeValues" />
+            android:entryValues="@array/transitionTypeValues"
+            android:key="@string/sett_key_transition"
+            android:summary="@string/sett_transitionSumm"
+            android:title="@string/sett_transition" />
         <CheckBoxPreference
-            android:title="@string/sett_scaling"
+            android:key="@string/sett_key_scaling"
             android:summary="@string/sett_scalingSumm"
             android:summaryOff="@string/sett_scalingSummOff"
             android:summaryOn="@string/sett_scalingSummOn"
-            android:defaultValue="false"
-            android:key="@string/sett_key_scaling" />
+            android:title="@string/sett_scaling" />
         <CheckBoxPreference
-            android:title="@string/sett_randomize"
+            android:key="@string/sett_key_randomize"
             android:summary="@string/sett_randomizeSumm"
             android:summaryOff="@string/sett_randomizeSummOff"
             android:summaryOn="@string/sett_randomizeSummOn"
-            android:key="@string/sett_key_randomize"
-            android:defaultValue="false" />
+            android:title="@string/sett_randomize" />
     </PreferenceCategory>
-
 </PreferenceScreen>
