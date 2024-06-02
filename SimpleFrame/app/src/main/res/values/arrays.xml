@@ -2,38 +2,30 @@
 <resources>
 
     <string-array name="displayTimeEntries">
-        <item name="2">2 seconds</item>
         <item name="3">3 seconds</item>
-        <item name="4">4 seconds</item>
         <item name="5">5 seconds</item>
-        <item name="15">15 seconds</item>
+        <item name="10">10 seconds</item>
         <item name="30">30 seconds</item>
         <item name="60">1 minute</item>
-        <item name="90">1.5 minutes</item>
         <item name="300">5 minutes</item>
         <item name="600">10 minutes</item>
         <item name="1800">30 minutes</item>
         <item name="3600">1 hour</item>
-        <item name="5400">1.5 hours</item>
         <item name="18000">5 hours</item>
         <item name="36000">10 hours</item>
         <item name="86400">1 day</item>
     </string-array>
 
     <string-array name="displayTimeValues" translatable="false">
-        <item name="2">2</item>
         <item name="3">3</item>
-        <item name="4">4</item>
         <item name="5">5</item>
-        <item name="15">15</item>
+        <item name="15">10</item>
         <item name="30">30</item>
         <item name="60">60</item>
-        <item name="90">90</item>
         <item name="300">300</item>
         <item name="600">600</item>
         <item name="1800">1800</item>
         <item name="3600">3600</item>
-        <item name="5400">5400</item>
         <item name="18000">18000</item>
         <item name="36000">36000</item>
         <item name="86400">86400</item>

@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
     private Timer slideshowTimer;
     private Gestures showActionBarGestures;
 
-    private String loadedImagePath;
+    private List<String> loadedImagePaths;
     private boolean paused;
 
     private final PageTransformer[] TRANSFORMERS = new PageTransformer[]{
@@ -293,8 +293,6 @@ public class MainActivity extends AppCompatActivity {
         slideshowTimer.cancel();
         slideshowTimer = null;
 
-        loadedImagePath = AppData.getImagePath(getApplicationContext());
-
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         currentPage = pager.getCurrentItem();
@@ -311,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showActionBar() {
-        debug("show");
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         ActionBar actionBar = this.getSupportActionBar();
         if (actionBar != null) {
@@ -360,8 +357,9 @@ public class MainActivity extends AppCompatActivity {
     private void startSlideshow() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         String imagePath = AppData.getImagePath(getApplicationContext());
-        if (!imagePath.equals(loadedImagePath) && !FileUtils.getFileList(getApplicationContext(), imagePath).isEmpty()) {
-            loadedImagePath = imagePath;
+        List<String> imagePaths = FileUtils.getFileList(getApplicationContext(), imagePath);
+        if (!imagePaths.equals(loadedImagePaths)) {
+            loadedImagePaths = imagePaths;
 
             imagePagerAdapter = new ImagePagerAdapter(this);
             pager.setAdapter(imagePagerAdapter);
