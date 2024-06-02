@@ -85,7 +85,7 @@
         android:textSize="20sp"
         android:visibility="invisible" />
 
-    <louissimonmcnicoll.simpleframe.custom_views.CustomViewPager
+    <com.louissimonmcnicoll.simpleframe.custom_views.CustomViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

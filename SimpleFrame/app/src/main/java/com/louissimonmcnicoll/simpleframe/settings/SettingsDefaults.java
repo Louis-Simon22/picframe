@@ -1,4 +1,4 @@
-package louissimonmcnicoll.simpleframe.settings;
+package com.louissimonmcnicoll.simpleframe.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import java.util.HashMap;
 import java.util.Map;
 
-import louissimonmcnicoll.simpleframe.R;
+import com.louissimonmcnicoll.simpleframe.R;
 
 public final class SettingsDefaults {
 

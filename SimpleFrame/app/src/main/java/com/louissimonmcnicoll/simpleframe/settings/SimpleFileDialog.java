@@ -1,4 +1,4 @@
-package louissimonmcnicoll.simpleframe.settings;
+package com.louissimonmcnicoll.simpleframe.settings;
 
 /*
 * original Source:   http://www.scorchworks.com/Blog/simple-file-dialog-for-android-applications/
@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import louissimonmcnicoll.simpleframe.R;
-import louissimonmcnicoll.simpleframe.utils.SDCardHelper;
+import com.louissimonmcnicoll.simpleframe.R;
+import com.louissimonmcnicoll.simpleframe.utils.SDCardHelper;
 
 public class SimpleFileDialog {
     private String m_sdcardDirectory = "";

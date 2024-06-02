@@ -1,4 +1,4 @@
-package louissimonmcnicoll.simpleframe.utils;
+package com.louissimonmcnicoll.simpleframe.utils;
 
 import android.os.Environment;
 

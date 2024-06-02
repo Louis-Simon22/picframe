@@ -1,9 +1,9 @@
-package louissimonmcnicoll.simpleframe.settings;
+package com.louissimonmcnicoll.simpleframe.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import louissimonmcnicoll.simpleframe.R;
+import com.louissimonmcnicoll.simpleframe.R;
 
 /**
  * Stores App Settings, to get and load easily

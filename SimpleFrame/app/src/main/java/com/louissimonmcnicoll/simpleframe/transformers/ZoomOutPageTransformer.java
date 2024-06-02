@@ -1,4 +1,4 @@
-package louissimonmcnicoll.simpleframe.transformers;
+package com.louissimonmcnicoll.simpleframe.transformers;
 
 
 import androidx.viewpager.widget.ViewPager;

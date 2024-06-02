@@ -1,4 +1,4 @@
-package louissimonmcnicoll.simpleframe.activities;
+package com.louissimonmcnicoll.simpleframe.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -22,10 +22,10 @@ import androidx.appcompat.widget.Toolbar;
 import java.util.Map;
 import java.util.Objects;
 
-import louissimonmcnicoll.simpleframe.R;
-import louissimonmcnicoll.simpleframe.settings.AppData;
-import louissimonmcnicoll.simpleframe.settings.SettingsDefaults;
-import louissimonmcnicoll.simpleframe.settings.SimpleFileDialog;
+import com.louissimonmcnicoll.simpleframe.R;
+import com.louissimonmcnicoll.simpleframe.settings.AppData;
+import com.louissimonmcnicoll.simpleframe.settings.SettingsDefaults;
+import com.louissimonmcnicoll.simpleframe.settings.SimpleFileDialog;
 
 @SuppressWarnings("deprecation")
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {

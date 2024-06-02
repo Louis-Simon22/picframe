@@ -1,4 +1,4 @@
-package louissimonmcnicoll.simpleframe.utils;
+package com.louissimonmcnicoll.simpleframe.utils;
 
 import android.content.Context;
 
@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import louissimonmcnicoll.simpleframe.settings.AppData;
+import com.louissimonmcnicoll.simpleframe.settings.AppData;
 
 public class FileUtils {
     private static final List<String> ALLOWED_EXTS = Arrays.asList("jpg", "jpeg", "png");

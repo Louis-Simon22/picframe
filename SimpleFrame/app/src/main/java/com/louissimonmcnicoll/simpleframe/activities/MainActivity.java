@@ -1,4 +1,4 @@
-package louissimonmcnicoll.simpleframe.activities;
+package com.louissimonmcnicoll.simpleframe.activities;
 
 import android.Manifest;
 import android.app.Activity;
@@ -37,23 +37,23 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import louissimonmcnicoll.simpleframe.R;
-import louissimonmcnicoll.simpleframe.utils.FileUtils;
-import louissimonmcnicoll.simpleframe.transformers.AccordionTransformer;
-import louissimonmcnicoll.simpleframe.transformers.BackgroundToForegroundTransformer;
-import louissimonmcnicoll.simpleframe.transformers.CubeOutTransformer;
-import louissimonmcnicoll.simpleframe.custom_views.CustomViewPager;
-import louissimonmcnicoll.simpleframe.transformers.DrawFromBackTransformer;
-import louissimonmcnicoll.simpleframe.utils.EXIFUtils;
-import louissimonmcnicoll.simpleframe.transformers.FadeInFadeOutTransformer;
-import louissimonmcnicoll.simpleframe.transformers.FlipVerticalTransformer;
-import louissimonmcnicoll.simpleframe.transformers.ForegroundToBackgroundTransformer;
-import louissimonmcnicoll.simpleframe.utils.Gestures;
-import louissimonmcnicoll.simpleframe.transformers.RotateDownTransformer;
-import louissimonmcnicoll.simpleframe.transformers.StackTransformer;
-import louissimonmcnicoll.simpleframe.transformers.ZoomInTransformer;
-import louissimonmcnicoll.simpleframe.transformers.ZoomOutPageTransformer;
-import louissimonmcnicoll.simpleframe.settings.AppData;
+import com.louissimonmcnicoll.simpleframe.R;
+import com.louissimonmcnicoll.simpleframe.utils.FileUtils;
+import com.louissimonmcnicoll.simpleframe.transformers.AccordionTransformer;
+import com.louissimonmcnicoll.simpleframe.transformers.BackgroundToForegroundTransformer;
+import com.louissimonmcnicoll.simpleframe.transformers.CubeOutTransformer;
+import com.louissimonmcnicoll.simpleframe.custom_views.CustomViewPager;
+import com.louissimonmcnicoll.simpleframe.transformers.DrawFromBackTransformer;
+import com.louissimonmcnicoll.simpleframe.utils.EXIFUtils;
+import com.louissimonmcnicoll.simpleframe.transformers.FadeInFadeOutTransformer;
+import com.louissimonmcnicoll.simpleframe.transformers.FlipVerticalTransformer;
+import com.louissimonmcnicoll.simpleframe.transformers.ForegroundToBackgroundTransformer;
+import com.louissimonmcnicoll.simpleframe.utils.Gestures;
+import com.louissimonmcnicoll.simpleframe.transformers.RotateDownTransformer;
+import com.louissimonmcnicoll.simpleframe.transformers.StackTransformer;
+import com.louissimonmcnicoll.simpleframe.transformers.ZoomInTransformer;
+import com.louissimonmcnicoll.simpleframe.transformers.ZoomOutPageTransformer;
+import com.louissimonmcnicoll.simpleframe.settings.AppData;
 
 public class MainActivity extends AppCompatActivity {
 

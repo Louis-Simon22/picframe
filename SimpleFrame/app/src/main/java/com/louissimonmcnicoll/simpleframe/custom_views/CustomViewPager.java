@@ -1,4 +1,4 @@
-package louissimonmcnicoll.simpleframe.custom_views;
+package com.louissimonmcnicoll.simpleframe.custom_views;
 
 import android.content.Context;
 
