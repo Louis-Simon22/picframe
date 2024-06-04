@@ -23,10 +23,6 @@
     <string name="settings_category_source">Quellen-Einstellungen</string>
     <string name="settings_category_slideshow">Anzeige-Einstellungen</string>
     <string name="sett_srcPath_externalSD">Pfade zu Bildern</string>
-    <string name="sett_recursiveSearch">Bilder aus Unterordnern anzeigen</string>
-    <string name="sett_recursiveSearchSumm">Ob Bilder aus Unterordnern angezeigt werden sollen</string>
-    <string name="sett_recursiveSearchSummOff">Bilder aus Unterordnern werden nicht angezeigt</string>
-    <string name="sett_recursiveSearchSummOn">Bilder aus Unterordnern werden angezeigt</string>
     <string name="sett_transition">Übergänge</string>
     <string name="sett_transitionSumm">Wählen Sie, welche Bildübergänge Sie bei der Slideshow haben wollen.</string>
     <string name="sett_dialog_title">Ordner auswählen</string>
