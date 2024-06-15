@@ -1,11 +1,11 @@
 Affiche les images d'un dossier dans un diaporama avec 12 types de transition disponibles.
 
-Supporte les fichiers locaux seulement. Je suggère de transférer les fichier depuis un ordinateur à l'aide d'une connexion USB.
+Conçu pour trouver une utilité aux vieux appareils qui ne sont plus supportés. Dans ce but l'application n'a pas de fonctionnalités impliquant le réseau puisque les vieux appareils sont souvent vulnérables.
 
-Conçu pour trouver une utilité aux vieux appareils qui ne sont plus supportés. Dans ce but l'application n'a pas de fonctionnalité impliquant le réseau puisque les vieux appareils sont souvent vulnérables.
+Supporte les fichiers locaux seulement. Je suggère de transférer les fichiers depuis un ordinateur à l'aide d'une connexion USB.
 
 Fonctionnalités:
-- Affiche les images d'une dossier local dans un diaporama
+- Affiche les images d'un dossier local dans un diaporama
 - 12 types de transitions entre les images
 - Temps d'affichage personnalisable
 - Option pour mettre les images à l'échelle de l'écran
