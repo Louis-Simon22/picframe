@@ -8,19 +8,19 @@ There are no networking features since old devices are inherently insecure. I re
 
 ## Screenshots
 
-<img src="en-US/images/phoneScreenshots/1.png" width="300" alt="Stack transition" title="Stack transition">
+<img src="metadata/en-US/images/phoneScreenshots/1.png" width="300" alt="Stack transition" title="Stack transition">
 <br/><br/><br/>
 
-<img src="en-US/images/phoneScreenshots/2.png" height="300" alt="Fade transition" title="Fade transition">
+<img src="metadata/en-US/images/phoneScreenshots/2.png" height="300" alt="Fade transition" title="Fade transition">
 <br/><br/><br/>
 
-<img src="en-US/images/phoneScreenshots/3.png" height="300" alt="Accordion transition" title="Accordion transition">
+<img src="metadata/en-US/images/phoneScreenshots/3.png" height="300" alt="Accordion transition" title="Accordion transition">
 <br/><br/><br/>
 
-<img src="en-US/images/phoneScreenshots/4.png" height="300" alt="Stack transition landscape" title="Stack transition landscape">
+<img src="metadata/en-US/images/phoneScreenshots/4.png" height="300" alt="Stack transition landscape" title="Stack transition landscape">
 <br/><br/><br/>
 
-<img src="en-US/images/phoneScreenshots/5.png" width="300" alt="Settings" title="Settings">
+<img src="metadata/en-US/images/phoneScreenshots/5.png" width="300" alt="Settings" title="Settings">
 <br/><br/><br/>
 
 ### License
