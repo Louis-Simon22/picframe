@@ -6,6 +6,7 @@
 .DS_Store
 /build
 *.class
+# *.apk
 *.ap_
 *.dex
 bin/
