@@ -1,3 +1,5 @@
+# Source: https://github.com/marketplace/actions/build-and-release-apk
+
 name: Android CI
 
 on:
@@ -23,6 +25,13 @@ jobs:
     - name: Grant execute permission for gradlew
       working-directory: ./SimpleFrame
       run: chmod +x gradlew
+      
     - name: Build with Gradle
       working-directory: ./SimpleFrame
-      run: ./gradlew build
+      run: ./gradlew assembleRelease
+      
+    - name: Releasing on GitHub
+      uses: sangatdesai/release-apk@main
+      env:
+       GITHUB_TOKEN: ${{ secrets.TOKEN }}
+       APP_FOLDER: ./SimpleFrame/app
