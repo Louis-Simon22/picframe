@@ -4,9 +4,8 @@ name: Android CI
 
 on:
   push:
-    branches: [ "fork_master" ]
-  pull_request:
-    branches: [ "fork_master" ]
+    tags:
+      - '*'
 
 jobs:
   build:
