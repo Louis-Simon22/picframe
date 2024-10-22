@@ -1,12 +1,14 @@
 package com.louissimonmcnicoll.simpleframe.utils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 
 import androidx.exifinterface.media.ExifInterface;
 
+import android.os.Build;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -18,7 +20,6 @@ import java.io.IOException;
 public class EXIFUtils {
 
     public static Bitmap decodeFile(String filePath, Context myContext) {
-
         // Decode image size
         BitmapFactory.Options o = new BitmapFactory.Options();
         o.inJustDecodeBounds = true;
@@ -26,8 +27,15 @@ public class EXIFUtils {
 
         // The new size we want to scale to ( max display resolution)
         WindowManager wm = (WindowManager) myContext.getSystemService(Context.WINDOW_SERVICE);
-        int width = wm.getCurrentWindowMetrics().getBounds().width();
-        int height = wm.getCurrentWindowMetrics().getBounds().height();
+        int width;
+        int height;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            width = wm.getCurrentWindowMetrics().getBounds().width();
+            height = wm.getCurrentWindowMetrics().getBounds().height();
+        } else {
+            width = Resources.getSystem().getDisplayMetrics().widthPixels;
+            height = Resources.getSystem().getDisplayMetrics().heightPixels;
+        }
         int requiredSize = Math.max(width, height);
 
         // Find the correct scale value. It should be the power of 2.
